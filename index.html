@@ -6,68 +6,131 @@
     <title>Trade & Tally Class</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
-    <!-- INTRO SCREEN -->
+    <!-- =========================================================
+         INTRO SCREEN
+         The intro graphic fills the entire viewport.
+         The Start Lesson button sits ON TOP of the image.
+         ========================================================= -->
     <div id="intro-screen" class="screen active">
-        <img id="intro-graphic" src="ui/intro_safezone.png" alt="Trade and Tally Intro">
-        <img id="start-btn" src="ui/start_btn.png" alt="Start Lesson">
+
+        <img
+            id="intro-graphic"
+            src="ui/intro_safezone.png"
+            alt="Trade and Tally Class"
+        >
+
+        <img
+            id="start-btn"
+            src="ui/start_btn.png"
+            alt="Start Lesson"
+        >
+
     </div>
 
-    <!-- MAIN GAME BOARD -->
+
+    <!-- =========================================================
+         MAIN GAME BOARD
+         ========================================================= -->
     <div id="game-screen" class="screen">
-        
+
         <div id="game-ui-header">
             <div id="round-display">Round: 1 / 10</div>
             <div id="truck-display">On the Truck: 0 / 5</div>
             <div id="score-display">Score: 0 / 2000</div>
         </div>
-        
+
         <div id="game-layout">
+
             <!-- BEGIN ROUND OVERLAY -->
             <div id="begin-overlay">
                 <button id="begin-btn">Begin</button>
             </div>
 
-            <!-- LEFT/CENTER: CONVEYOR BELT -->
+            <!-- CONVEYOR BELT -->
             <div id="conveyor-container">
                 <div id="moving-belt"></div>
                 <div id="static-frame"></div>
-                <div id="item-track"></div> 
+                <div id="item-track"></div>
             </div>
 
-            <!-- RIGHT: DROP BOXES -->
+            <!-- DROP BOXES -->
             <div id="boxes-container"></div>
+
         </div>
 
     </div>
 
-    <!-- ROUND RESULTS SCREEN -->
+
+    <!-- =========================================================
+         ROUND RESULTS SCREEN
+         ========================================================= -->
     <div id="round-results-screen" class="screen overlay-bg">
+
         <div class="results-content">
+
             <h2 id="results-title">Round Complete!</h2>
+
             <p id="results-stats"></p>
-            <button id="next-round-btn">Next Round</button>
+
+            <button id="next-round-btn">
+                Next Round
+            </button>
+
         </div>
+
     </div>
 
-    <!-- GAME OVER SCREEN -->
+
+    <!-- =========================================================
+         GAME OVER SCREEN
+         ========================================================= -->
     <div id="game-over-screen" class="screen overlay-bg">
-        <img id="game-over-img" src="ui/game-over-screen.png" alt="Shipment Ruined">
+
+        <img
+            id="game-over-img"
+            src="ui/game-over-screen.png"
+            alt="Shipment Ruined"
+        >
+
         <p id="fail-reason-text"></p>
-        <button id="restart-btn">Try Again</button>
+
+        <button id="restart-btn">
+            Try Again
+        </button>
+
     </div>
 
-    <!-- VICTORY SCREEN -->
+
+    <!-- =========================================================
+         VICTORY SCREEN
+         ========================================================= -->
     <div id="victory-screen" class="screen overlay-bg">
+
         <div class="victory-content">
+
             <h2>Class Complete!</h2>
-            <p>You have perfectly packed all shipments.</p>
-            <p>Final Score: 2000 / 2000</p>
-            <button id="return-hub-btn">Return to Hub (+100 EXP)</button>
+
+            <p>
+                You have perfectly packed all shipments.
+            </p>
+
+            <p>
+                Final Score: 2000 / 2000
+            </p>
+
+            <button id="return-hub-btn">
+                Return to Hub (+100 EXP)
+            </button>
+
         </div>
+
     </div>
+
 
     <script src="js/game.js"></script>
+
 </body>
 </html>
