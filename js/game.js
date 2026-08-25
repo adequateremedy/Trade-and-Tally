@@ -38,13 +38,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let boxesSpawnedThisRound = 0;
     let activeBoxesCount = 0;
 
-    // Categories and Items
+    // Categories and Exactly Matched Items
     const itemsData = {
-        mechanical_parts: ['Bolt.png', 'Nut.png', 'Screw.png', 'Washer.png', 'Rivet.png', 'Hinge.png', 'Spring.png', 'Steam_Valve.png', 'Bracket.png', 'Piston.png'],
-        tools: ['Wrench.png', 'Hammer.png', 'Screwdriver.png', 'Pliers.png', 'Calipers.png', 'File.png', 'Hand_Drill.png', 'Mallet.png', 'Chisel.png', 'Hacksaw.png'],
-        gears_cogs: ['Cog.png', 'Gear.png', 'Pinion.png', 'Flywheel.png', 'Sprocket.png', 'Ratchet.png', 'Cam.png', 'Mainspring.png', 'Spindle.png', 'Crank.png'],
-        raw_materials: ['Wire_Spool.png', 'Pipe.png', 'Plate.png', 'Ore.png', 'Coal_Chunk.png', 'Leather_Scrap.png', 'Glass_Shard.png', 'Wood_Block.png', 'Sheet_Metal.png', 'Rubber_Tubing.png'],
-        navigation: ['Lantern.png', 'Matchbox.png', 'Compass.png', 'Spyglass.png', 'Pocket_Watch.png', 'Monocle.png', 'Oil_Flask.png', 'Magnifying_Lens.png', 'Sundial.png', 'Sextant.png'] // JUNK
+        mechanical_parts: ['Bolt-removebg-preview.png', 'Bracket-removebg-preview.png', 'Hinge-removebg-preview.png', 'Nut-removebg-preview.png', 'Piston-removebg-preview.png', 'Rivet-removebg-preview.png', 'Screw-removebg-preview.png', 'Spring-removebg-preview.png', 'Valve-removebg-preview.png', 'Washer-removebg-preview.png'],
+        tools: ['Calipers-removebg-preview.png', 'Chisel-removebg-preview.png', 'Drill-removebg-preview.png', 'File-removebg-preview.png', 'Hackksaw-removebg-preview.png', 'Hammer-removebg-preview.png', 'Mallet-removebg-preview.png', 'Pliers-removebg-preview.png', 'Screwdriver-removebg-preview.png', 'Wrench-removebg-preview.png'],
+        gears_cogs: ['Cam.png', 'Cog.png', 'Crank.png', 'FlyWheel.png', 'Gear.png', 'Main-Spring.png', 'Pinion.png', 'Rachet.png', 'Spindel.png', 'Sprocket.png'],
+        raw_materials: ['Coal-Chunk.png', 'Glass-Shard.png', 'Leather-Scrap.png', 'Ore.png', 'Pipe.png', 'Plate.png', 'Rubber-Tubing.png', 'Sheet-Metal.png', 'Wire-Spool.png', 'Wood-Block.png'],
+        navigation: ['Compass.png', 'Lantern.png', 'Magnifying-Lens.png', 'Matchbox.png', 'Monocle.png', 'Oil-Flask.png', 'Pocket-Watch.png', 'Sextant.png', 'Spyglass.png', 'Sundial.png'] // JUNK
     };
 
     // Exactly 100 boxes across 10 rounds = 2000 points
@@ -52,6 +52,11 @@ document.addEventListener("DOMContentLoaded", () => {
     
     let activeCategories = [];
     let junkChance = 0;
+
+    // Clean display name helper
+    function getDisplayName(filename) {
+        return filename.replace('-removebg-preview.png', '').replace('.png', '');
+    }
 
     startBtn.addEventListener("click", () => {
         introScreen.classList.remove("active");
@@ -130,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
         for(let i=0; i<numTypes; i++) {
             let randIndex = Math.floor(Math.random() * availableItems.length);
             let itemFile = availableItems.splice(randIndex, 1)[0];
-            let reqAmount = Math.floor(Math.random() * 3) + 1; // 1 to 3 items per type
+            let reqAmount = Math.floor(Math.random() * 3) + 1;
             boxData.req[itemFile] = { count: 0, required: reqAmount };
         }
         
@@ -156,7 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
             let li = document.createElement('li');
             li.className = 'tally-item';
             li.id = `tally-${boxData.elementId}-${itemName}`;
-            li.innerText = `${itemName.split('.')[0]}: 0 / ${boxData.req[itemName].required}`;
+            let displayName = getDisplayName(itemName);
+            li.innerText = `${displayName}: 0 / ${boxData.req[itemName].required}`;
             ul.appendChild(li);
         });
         tallyBoard.appendChild(ul);
@@ -181,7 +187,6 @@ document.addEventListener("DOMContentLoaded", () => {
             category = 'navigation';
             itemFile = itemsData[category][Math.floor(Math.random() * itemsData[category].length)];
         } else {
-            // Check what active boxes actually need right now to keep the game moving
             let neededPool = [];
             Object.values(activeBoxesData).forEach(box => {
                 Object.keys(box.req).forEach(item => {
@@ -191,7 +196,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
 
-            // 70% chance to spawn exactly what is needed, 30% chance for random valid part
             if (neededPool.length > 0 && Math.random() < 0.7) {
                 let chosen = neededPool[Math.floor(Math.random() * neededPool.length)];
                 category = chosen.cat;
@@ -228,7 +232,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 item.el.style.top = '50%'; 
 
                 let trackWidth = itemTrack.offsetWidth;
-                // Safely despawn items that reach the end of the infinite belt without penalty
                 if (item.x > trackWidth) {
                     item.el.remove();
                     activeItems.splice(i, 1);
@@ -335,7 +338,8 @@ document.addEventListener("DOMContentLoaded", () => {
             // Valid Drop
             reqData.count++;
             let tallyLi = document.getElementById(`tally-${targetBoxId}-${filename}`);
-            tallyLi.innerText = `${filename.split('.')[0]}: ${reqData.count} / ${reqData.required}`;
+            let displayName = getDisplayName(filename);
+            tallyLi.innerText = `${displayName}: ${reqData.count} / ${reqData.required}`;
             
             if (reqData.count === reqData.required) {
                 tallyLi.classList.add('complete');
@@ -367,14 +371,13 @@ document.addEventListener("DOMContentLoaded", () => {
             scoreDisplay.innerText = `Score: ${score} / 2000`;
             truckDisplay.innerText = `On the Truck: ${boxesShippedThisRound} / ${totalBoxesThisRound}`;
             
-            // Remove box from screen and logic
             document.getElementById(`wrapper-${boxId}`).remove();
             delete activeBoxesData[boxId];
 
             if (boxesShippedThisRound >= totalBoxesThisRound) {
                 endRoundSuccess();
             } else {
-                maintainBoxes(); // Spawn next box in queue
+                maintainBoxes(); 
             }
         }
     }
