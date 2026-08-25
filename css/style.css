@@ -38,20 +38,22 @@ body, html {
 }
 
 .intro-spacer {
-    height: 15vh; /* Leaves space for the "Trade & Tally Class" title burned into the BG */
+    height: 22vh; 
     width: 100%;
 }
 
 #intro-text-img {
-    max-height: 55vh; 
+    height: 65vh; 
+    max-width: 90vw;
     object-fit: contain;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     opacity: 0;
     animation: fadeIn 1.5s forwards 0.5s;
 }
 
 #start-btn {
-    height: 60px;
+    height: 8vh;
+    width: auto;
     cursor: pointer;
     transition: transform 0.2s;
     opacity: 0;
@@ -174,7 +176,7 @@ body, html {
     align-items: center;
     justify-content: flex-end;
     width: 100%;
-    height: 180px; /* Scaled slightly to ensure 3 boxes fit cleanly */
+    height: 180px; 
 }
 
 .tally-board {
