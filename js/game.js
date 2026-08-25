@@ -4,15 +4,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const introScreen = document.getElementById("intro-screen");
     const gameScreen = document.getElementById("game-screen");
     const gameOverScreen = document.getElementById("game-over-screen");
+    const roundResultsScreen = document.getElementById("round-results-screen");
     const victoryScreen = document.getElementById("victory-screen");
+    
     const startBtn = document.getElementById("start-btn");
     const restartBtn = document.getElementById("restart-btn");
+    const nextRoundBtn = document.getElementById("next-round-btn");
+    
     const roundDisplay = document.getElementById("round-display");
+    const truckDisplay = document.getElementById("truck-display");
     const scoreDisplay = document.getElementById("score-display");
+    const resultsStats = document.getElementById("results-stats");
+    const failReasonText = document.getElementById("fail-reason-text");
+    
     const movingBelt = document.getElementById("moving-belt");
     const itemTrack = document.getElementById("item-track");
     const boxesContainer = document.getElementById("boxes-container");
-    const failReasonText = document.getElementById("fail-reason-text");
 
     // Game State
     let currentRound = 1;
@@ -21,10 +28,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let spawnTimer;
     let beltSpeed = 2; 
     let spawnRate = 2500;
-    let activeItems = [];
-    let currentTallies = {}; 
     
-    // Categories and Items (Filenames must match exactly in assets/images/items/... folders)
+    let activeItems = [];
+    let activeBoxesData = {};
+    let boxIdCounter = 0;
+    
+    let totalBoxesThisRound = 0;
+    let boxesShippedThisRound = 0;
+    let boxesSpawnedThisRound = 0;
+    let activeBoxesCount = 0;
+
+    // Categories and Items
     const itemsData = {
         mechanical_parts: ['Bolt.png', 'Nut.png', 'Screw.png', 'Washer.png', 'Rivet.png', 'Hinge.png', 'Spring.png', 'Steam_Valve.png', 'Bracket.png', 'Piston.png'],
         tools: ['Wrench.png', 'Hammer.png', 'Screwdriver.png', 'Pliers.png', 'Calipers.png', 'File.png', 'Hand_Drill.png', 'Mallet.png', 'Chisel.png', 'Hacksaw.png'],
@@ -33,8 +47,11 @@ document.addEventListener("DOMContentLoaded", () => {
         navigation: ['Lantern.png', 'Matchbox.png', 'Compass.png', 'Spyglass.png', 'Pocket_Watch.png', 'Monocle.png', 'Oil_Flask.png', 'Magnifying_Lens.png', 'Sundial.png', 'Sextant.png'] // JUNK
     };
 
-    // Exactly 100 items total across 10 rounds to reach 2000 points (20 pts per item)
-    const itemsPerRound = [5, 6, 7, 8, 9, 10, 11, 12, 15, 17];
+    // Exactly 100 boxes across 10 rounds = 2000 points
+    const boxesPerRound = [5, 6, 7, 8, 9, 10, 11, 12, 15, 17];
+    
+    let activeCategories = [];
+    let junkChance = 0;
 
     startBtn.addEventListener("click", () => {
         introScreen.classList.remove("active");
@@ -47,21 +64,34 @@ document.addEventListener("DOMContentLoaded", () => {
         startRound(1);
     });
 
+    nextRoundBtn.addEventListener("click", () => {
+        roundResultsScreen.classList.remove("active");
+        startRound(currentRound + 1);
+    });
+
     function startRound(round) {
         currentRound = round;
         gameActive = true;
         activeItems = [];
+        activeBoxesData = {};
+        boxIdCounter = 0;
+        
+        totalBoxesThisRound = boxesPerRound[currentRound - 1];
+        boxesShippedThisRound = 0;
+        boxesSpawnedThisRound = 0;
+        activeBoxesCount = 0;
+
         itemTrack.innerHTML = '';
         boxesContainer.innerHTML = '';
-        currentTallies = {};
 
         roundDisplay.innerText = `Round: ${currentRound} / 10`;
+        truckDisplay.innerText = `On the Truck: 0 / ${totalBoxesThisRound}`;
         scoreDisplay.innerText = `Score: ${score} / 2000`;
 
         gameScreen.classList.add("active");
 
         setupRoundConfig();
-        buildBoxes();
+        maintainBoxes();
         
         movingBelt.style.animationDuration = `${10 / beltSpeed}s`;
         
@@ -70,112 +100,111 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setupRoundConfig() {
-        if (currentRound <= 2) { beltSpeed = 1.5; spawnRate = 3000; }
-        else if (currentRound <= 5) { beltSpeed = 2; spawnRate = 2500; }
-        else if (currentRound <= 8) { beltSpeed = 3; spawnRate = 2000; }
-        else { beltSpeed = 4; spawnRate = 1500; }
+        if (currentRound <= 2) { beltSpeed = 1.5; spawnRate = 2500; }
+        else if (currentRound <= 5) { beltSpeed = 2; spawnRate = 2000; }
+        else if (currentRound <= 8) { beltSpeed = 3; spawnRate = 1500; }
+        else { beltSpeed = 4; spawnRate = 1200; }
 
-        let categoriesToUse = [];
-        let junkChance = 0;
-        let totalItemsThisRound = itemsPerRound[currentRound - 1];
+        if (currentRound === 1) { activeCategories = ['mechanical_parts']; junkChance = 0; }
+        else if (currentRound <= 3) { activeCategories = ['mechanical_parts', 'tools']; junkChance = currentRound === 3 ? 0.2 : 0; }
+        else if (currentRound <= 8) { activeCategories = ['mechanical_parts', 'tools', 'raw_materials']; junkChance = 0.3; }
+        else { activeCategories = ['mechanical_parts', 'tools', 'raw_materials', 'gears_cogs']; junkChance = 0.4; }
+    }
 
-        if (currentRound === 1) { categoriesToUse = ['mechanical_parts']; }
-        else if (currentRound <= 3) { categoriesToUse = ['mechanical_parts', 'tools']; junkChance = currentRound === 3 ? 0.2 : 0; }
-        else if (currentRound <= 8) { categoriesToUse = ['mechanical_parts', 'tools', 'raw_materials']; junkChance = 0.3; }
-        else { categoriesToUse = ['mechanical_parts', 'tools', 'raw_materials', 'gears_cogs']; junkChance = 0.4; }
-
-        currentTallies.junkChance = junkChance;
-
-        categoriesToUse.forEach(cat => {
-            currentTallies[cat] = { req: {}, totalMet: false };
-        });
-
-        // Distribute the exact number of required items across the chosen categories
-        for (let i = 0; i < totalItemsThisRound; i++) {
-            let cat = categoriesToUse[i % categoriesToUse.length];
-            let existingItems = Object.keys(currentTallies[cat].req);
-            let itemFile;
-
-            // Limit unique items per category to 3 so it fits visually on the tally board
-            if (existingItems.length > 0 && Math.random() > 0.5 && existingItems.length >= 2) {
-                itemFile = existingItems[Math.floor(Math.random() * existingItems.length)];
-            } else if (existingItems.length < 3) {
-                let available = itemsData[cat].filter(item => !existingItems.includes(item));
-                itemFile = available[Math.floor(Math.random() * available.length)];
-            } else {
-                itemFile = existingItems[Math.floor(Math.random() * existingItems.length)];
-            }
-
-            if (!currentTallies[cat].req[itemFile]) {
-                currentTallies[cat].req[itemFile] = { count: 0, required: 0 };
-            }
-            currentTallies[cat].req[itemFile].required++;
+    function maintainBoxes() {
+        while (activeBoxesCount < 3 && boxesSpawnedThisRound < totalBoxesThisRound) {
+            spawnBox();
+            activeBoxesCount++;
+            boxesSpawnedThisRound++;
         }
     }
 
-    function buildBoxes() {
-        Object.keys(currentTallies).forEach(cat => {
-            if(cat === 'junkChance') return;
-            
-            let boxWrapper = document.createElement('div');
-            boxWrapper.className = 'box-wrapper';
+    function spawnBox() {
+        let boxId = `box-${boxIdCounter++}`;
+        let category = activeCategories[Math.floor(Math.random() * activeCategories.length)];
+        
+        let boxData = { category: category, req: {}, elementId: boxId };
+        let numTypes = currentRound < 4 ? 2 : 3;
+        
+        let availableItems = [...itemsData[category]];
+        for(let i=0; i<numTypes; i++) {
+            let randIndex = Math.floor(Math.random() * availableItems.length);
+            let itemFile = availableItems.splice(randIndex, 1)[0];
+            let reqAmount = Math.floor(Math.random() * 3) + 1; // 1 to 3 items per type
+            boxData.req[itemFile] = { count: 0, required: reqAmount };
+        }
+        
+        activeBoxesData[boxId] = boxData;
+        renderBox(boxData);
+    }
 
-            let tallyBoard = document.createElement('div');
-            tallyBoard.className = 'tally-board';
-            tallyBoard.innerHTML = `<div>${cat.replace('_', ' ').toUpperCase()}</div>`;
-            
-            let ul = document.createElement('ul');
-            ul.style.listStyle = 'none';
-            ul.style.padding = '0';
-            
-            Object.keys(currentTallies[cat].req).forEach(itemName => {
-                let li = document.createElement('li');
-                li.className = 'tally-item';
-                li.id = `tally-${itemName}`;
-                li.innerText = `${itemName.split('.')[0]}: 0 / ${currentTallies[cat].req[itemName].required}`;
-                ul.appendChild(li);
-            });
-            tallyBoard.appendChild(ul);
+    function renderBox(boxData) {
+        let boxWrapper = document.createElement('div');
+        boxWrapper.className = 'box-wrapper';
+        boxWrapper.id = `wrapper-${boxData.elementId}`;
 
-            let dropBox = document.createElement('div');
-            dropBox.className = 'drop-box';
-            dropBox.dataset.category = cat;
-
-            boxWrapper.appendChild(tallyBoard);
-            boxWrapper.appendChild(dropBox);
-            boxesContainer.appendChild(boxWrapper);
+        let tallyBoard = document.createElement('div');
+        tallyBoard.className = 'tally-board';
+        tallyBoard.innerHTML = `<div style="margin-bottom:10px;">${boxData.category.replace('_', ' ').toUpperCase()}</div>`;
+        
+        let ul = document.createElement('ul');
+        ul.style.listStyle = 'none';
+        ul.style.padding = '0';
+        ul.style.margin = '0';
+        
+        Object.keys(boxData.req).forEach(itemName => {
+            let li = document.createElement('li');
+            li.className = 'tally-item';
+            li.id = `tally-${boxData.elementId}-${itemName}`;
+            li.innerText = `${itemName.split('.')[0]}: 0 / ${boxData.req[itemName].required}`;
+            ul.appendChild(li);
         });
+        tallyBoard.appendChild(ul);
+
+        let dropBox = document.createElement('div');
+        dropBox.className = 'drop-box';
+        dropBox.dataset.boxId = boxData.elementId;
+        dropBox.dataset.category = boxData.category;
+
+        boxWrapper.appendChild(tallyBoard);
+        boxWrapper.appendChild(dropBox);
+        boxesContainer.appendChild(boxWrapper);
     }
 
     function spawnItem() {
         if (!gameActive) return;
 
-        let isJunk = Math.random() < currentTallies.junkChance;
+        let isJunk = Math.random() < junkChance;
         let category, itemFile;
 
         if (isJunk) {
             category = 'navigation';
             itemFile = itemsData[category][Math.floor(Math.random() * itemsData[category].length)];
         } else {
-            let activeCats = Object.keys(currentTallies).filter(c => c !== 'junkChance' && !currentTallies[c].totalMet);
-            if(activeCats.length === 0) return;
-            category = activeCats[Math.floor(Math.random() * activeCats.length)];
-            
-            // Spawn required items heavily
-            let neededItems = Object.keys(currentTallies[category].req).filter(item => 
-                currentTallies[category].req[item].count < currentTallies[category].req[item].required
-            );
-            
-            if(neededItems.length > 0) {
-                itemFile = neededItems[Math.floor(Math.random() * neededItems.length)];
+            // Check what active boxes actually need right now to keep the game moving
+            let neededPool = [];
+            Object.values(activeBoxesData).forEach(box => {
+                Object.keys(box.req).forEach(item => {
+                    if (box.req[item].count < box.req[item].required) {
+                        neededPool.push({ cat: box.category, file: item });
+                    }
+                });
+            });
+
+            // 70% chance to spawn exactly what is needed, 30% chance for random valid part
+            if (neededPool.length > 0 && Math.random() < 0.7) {
+                let chosen = neededPool[Math.floor(Math.random() * neededPool.length)];
+                category = chosen.cat;
+                itemFile = chosen.file;
             } else {
+                category = activeCategories[Math.floor(Math.random() * activeCategories.length)];
                 itemFile = itemsData[category][Math.floor(Math.random() * itemsData[category].length)];
             }
         }
 
         let itemEl = document.createElement('div');
         itemEl.className = 'game-item';
-        itemEl.style.backgroundImage = `url('../assets/images/items/${category}/${itemFile}')`;
+        itemEl.style.backgroundImage = `url('assets/images/items/${category}/${itemFile}')`;
         itemEl.dataset.category = category;
         itemEl.dataset.filename = itemFile;
         itemEl.style.left = '-80px';
@@ -199,17 +228,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 item.el.style.top = '50%'; 
 
                 let trackWidth = itemTrack.offsetWidth;
+                // Safely despawn items that reach the end of the infinite belt without penalty
                 if (item.x > trackWidth) {
-                    if (item.dataset.category !== 'navigation') {
-                        let cat = item.dataset.category;
-                        if(currentTallies[cat] && currentTallies[cat].req[item.dataset.filename]) {
-                            let data = currentTallies[cat].req[item.dataset.filename];
-                            if(data.count < data.required) {
-                                gameOver("A required item fell off the belt!");
-                                return;
-                            }
-                        }
-                    }
                     item.el.remove();
                     activeItems.splice(i, 1);
                 }
@@ -289,18 +309,20 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (droppedInBox) {
-            let boxCat = droppedInBox.dataset.category;
-            
             if (category === 'navigation') {
                 gameOver("You packed a junk item!");
                 return;
             }
-            if (category !== boxCat) {
+
+            let targetBoxId = droppedInBox.dataset.boxId;
+            let targetBoxData = activeBoxesData[targetBoxId];
+
+            if (category !== targetBoxData.category) {
                 gameOver("You put an item in the wrong box!");
                 return;
             }
             
-            let reqData = currentTallies[boxCat].req[filename];
+            let reqData = targetBoxData.req[filename];
             if (!reqData) {
                 gameOver("You packed an item not on the tally list!");
                 return;
@@ -312,10 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Valid Drop
             reqData.count++;
-            score += 20;
-            scoreDisplay.innerText = `Score: ${score} / 2000`;
-
-            let tallyLi = document.getElementById(`tally-${filename}`);
+            let tallyLi = document.getElementById(`tally-${targetBoxId}-${filename}`);
             tallyLi.innerText = `${filename.split('.')[0]}: ${reqData.count} / ${reqData.required}`;
             
             if (reqData.count === reqData.required) {
@@ -324,37 +343,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
             el.remove();
             activeItems = activeItems.filter(i => i !== itemObj);
-            checkRoundComplete();
+            
+            checkBoxComplete(targetBoxId);
         } else {
             gameOver("You dropped an item on the floor!");
         }
     }
 
-    function checkRoundComplete() {
+    function checkBoxComplete(boxId) {
+        let boxData = activeBoxesData[boxId];
         let allComplete = true;
-        Object.keys(currentTallies).forEach(cat => {
-            if(cat === 'junkChance') return;
-            let catComplete = true;
-            Object.values(currentTallies[cat].req).forEach(req => {
-                if(req.count < req.required) catComplete = false;
-            });
-            if(catComplete) currentTallies[cat].totalMet = true;
-            if(!catComplete) allComplete = false;
+        
+        Object.values(boxData.req).forEach(req => {
+            if (req.count < req.required) allComplete = false;
         });
 
         if (allComplete) {
-            gameActive = false;
-            clearInterval(spawnTimer);
+            // Box is shipped!
+            score += 20;
+            boxesShippedThisRound++;
+            activeBoxesCount--;
             
-            setTimeout(() => {
-                if (currentRound < 10) {
-                    startRound(currentRound + 1);
-                } else {
-                    gameScreen.classList.remove("active");
-                    victoryScreen.classList.add("active");
-                }
-            }, 1000);
+            scoreDisplay.innerText = `Score: ${score} / 2000`;
+            truckDisplay.innerText = `On the Truck: ${boxesShippedThisRound} / ${totalBoxesThisRound}`;
+            
+            // Remove box from screen and logic
+            document.getElementById(`wrapper-${boxId}`).remove();
+            delete activeBoxesData[boxId];
+
+            if (boxesShippedThisRound >= totalBoxesThisRound) {
+                endRoundSuccess();
+            } else {
+                maintainBoxes(); // Spawn next box in queue
+            }
         }
+    }
+
+    function endRoundSuccess() {
+        gameActive = false;
+        clearInterval(spawnTimer);
+        
+        setTimeout(() => {
+            if (currentRound < 10) {
+                resultsStats.innerText = `Boxes Shipped: ${boxesShippedThisRound}\nCurrent Score: ${score} / 2000`;
+                gameScreen.classList.remove("active");
+                roundResultsScreen.classList.add("active");
+            } else {
+                gameScreen.classList.remove("active");
+                victoryScreen.classList.add("active");
+            }
+        }, 1000);
     }
 
     function gameOver(reason) {
