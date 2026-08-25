@@ -23,49 +23,34 @@ body, html {
     display: block;
 }
 
-.screen.active.flex-column {
+/* INTRO SCREEN */
+#intro-screen {
+    background-image: url('../ui/intro_background.png');
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: top center;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
 }
 
-/* INTRO SCREEN */
-#intro-screen {
-    background-image: url('../ui/title_bg.png');
-    background-size: cover;
-    background-position: center top;
-}
-
-.intro-spacer {
-    height: 22vh; 
+#intro-spacer {
+    flex-grow: 1;
+    min-height: 80vh; 
     width: 100%;
 }
 
-#intro-text-img {
-    height: 65vh; 
-    max-width: 90vw;
-    object-fit: contain;
-    margin-bottom: 20px;
-    opacity: 0;
-    animation: fadeIn 1.5s forwards 0.5s;
-}
-
 #start-btn {
-    height: 8vh;
-    width: auto;
+    width: 300px;
+    height: auto;
     cursor: pointer;
+    margin-bottom: 50px;
     transition: transform 0.2s;
-    opacity: 0;
-    animation: fadeIn 1.5s forwards 1s;
 }
 
 #start-btn:hover {
     transform: scale(1.05);
-}
-
-@keyframes fadeIn {
-    to { opacity: 1; }
 }
 
 /* GAME SCREEN */
@@ -94,6 +79,36 @@ body, html {
     height: 100%;
     padding-top: 60px;
     box-sizing: border-box;
+    position: relative;
+}
+
+#begin-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+#begin-btn {
+    padding: 15px 40px;
+    font-size: 2rem;
+    background: #7F522B;
+    color: #fff;
+    border: 3px solid #e3d2b9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.8);
+    transition: transform 0.2s, background 0.2s;
+}
+
+#begin-btn:hover {
+    background: #5c3b1e;
+    transform: scale(1.05);
 }
 
 /* CONVEYOR */
@@ -220,6 +235,14 @@ body, html {
 .overlay-bg {
     background-color: rgba(0, 0, 0, 0.9);
     color: #e3d2b9;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.screen.active.overlay-bg {
+    display: flex;
 }
 
 #game-over-img {
