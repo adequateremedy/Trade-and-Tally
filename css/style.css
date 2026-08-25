@@ -25,10 +25,6 @@ body, html {
 
 /* INTRO SCREEN */
 #intro-screen {
-    background-image: url('../ui/intro_safezone.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     background-color: #000; 
 }
 
@@ -36,8 +32,14 @@ body, html {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
-    padding-bottom: 8vh;
+    justify-content: center;
+}
+
+#intro-graphic {
+    max-width: 95vw;
+    max-height: 75vh;
+    object-fit: contain;
+    margin-bottom: 4vh;
 }
 
 #start-btn {
@@ -46,7 +48,6 @@ body, html {
     height: auto;
     cursor: pointer;
     transition: transform 0.2s;
-    z-index: 10;
 }
 
 #start-btn:hover {
