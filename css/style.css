@@ -30,6 +30,9 @@ body, html {
     background-repeat: no-repeat;
     background-position: top center;
     overflow-y: auto;
+}
+
+#intro-screen.active {
     display: flex;
     flex-direction: column;
     align-items: center;
