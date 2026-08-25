@@ -9,9 +9,8 @@
 <body>
 
     <!-- INTRO / TUTORIAL SCREEN -->
-    <div id="intro-screen" class="screen active flex-column">
-        <div class="intro-spacer"></div>
-        <img id="intro-text-img" src="ui/intro_screen.png" alt="Instructions">
+    <div id="intro-screen" class="screen active">
+        <div id="intro-spacer"></div>
         <img id="start-btn" src="ui/start_btn.png" alt="Start Lesson">
     </div>
 
@@ -25,6 +24,11 @@
         </div>
         
         <div id="game-layout">
+            <!-- BEGIN ROUND OVERLAY -->
+            <div id="begin-overlay">
+                <button id="begin-btn">Begin</button>
+            </div>
+
             <!-- LEFT/CENTER: CONVEYOR BELT -->
             <div id="conveyor-container">
                 <div id="moving-belt"></div>
@@ -39,7 +43,7 @@
     </div>
 
     <!-- ROUND RESULTS SCREEN -->
-    <div id="round-results-screen" class="screen flex-column overlay-bg">
+    <div id="round-results-screen" class="screen overlay-bg">
         <div class="results-content">
             <h2 id="results-title">Round Complete!</h2>
             <p id="results-stats"></p>
@@ -48,14 +52,14 @@
     </div>
 
     <!-- GAME OVER SCREEN -->
-    <div id="game-over-screen" class="screen flex-column overlay-bg">
+    <div id="game-over-screen" class="screen overlay-bg">
         <img id="game-over-img" src="ui/game-over-screen.png" alt="Shipment Ruined">
         <p id="fail-reason-text"></p>
         <button id="restart-btn">Try Again</button>
     </div>
 
     <!-- VICTORY SCREEN -->
-    <div id="victory-screen" class="screen flex-column overlay-bg">
+    <div id="victory-screen" class="screen overlay-bg">
         <div class="victory-content">
             <h2>Class Complete!</h2>
             <p>You have perfectly packed all shipments.</p>
