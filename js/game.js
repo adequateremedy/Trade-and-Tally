@@ -239,11 +239,11 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let i = activeItems.length - 1; i >= 0; i--) {
             let item = activeItems[i];
             if (!item.isDragging) {
-                item.x -= beltSpeed; // Move Left
+                item.x -= beltSpeed; 
                 item.el.style.left = item.x + 'px';
                 item.el.style.top = '50%'; 
 
-                if (item.x < -80) { // Off screen left
+                if (item.x < -150) { 
                     item.el.remove();
                     activeItems.splice(i, 1);
                 }
