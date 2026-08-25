@@ -50,7 +50,7 @@ body, html {
 #start-btn {
     cursor: pointer;
     margin-bottom: 5%;
-    width: 200px; /* Adjust based on your button image size */
+    width: 200px; 
     transition: transform 0.2s;
 }
 
@@ -177,7 +177,7 @@ body, html {
     width: 150px;
     height: 180px;
     background-image: url('../ui/tally_bg.png');
-    background-size: stretch;
+    background-size: 100% 100%;
     background-repeat: no-repeat;
     background-position: center;
     margin-right: 10px;
@@ -212,11 +212,14 @@ body, html {
 /* GAME OVER & VICTORY */
 #game-over-screen, #victory-screen {
     background-color: rgba(0, 0, 0, 0.9);
-    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     color: #e3d2b9;
+}
+
+#game-over-screen.active, #victory-screen.active {
+    display: flex;
 }
 
 #game-over-img {
