@@ -235,14 +235,13 @@ body, html {
 .overlay-bg {
     background-color: rgba(0, 0, 0, 0.9);
     color: #e3d2b9;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
 }
 
 .screen.active.overlay-bg {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 #game-over-img {
