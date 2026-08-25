@@ -26,10 +26,10 @@ body, html {
 /* INTRO SCREEN */
 #intro-screen {
     background-image: url('../ui/intro_background.png');
-    background-size: 100% auto;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: top center;
-    overflow-y: auto;
+    background-color: #000; 
 }
 
 #intro-screen.active {
@@ -39,16 +39,16 @@ body, html {
 }
 
 #intro-spacer {
-    flex-grow: 1;
-    min-height: 80vh; 
+    flex-grow: 1; 
     width: 100%;
 }
 
 #start-btn {
     width: 300px;
+    max-width: 80vw;
     height: auto;
     cursor: pointer;
-    margin-bottom: 50px;
+    margin-bottom: 5vh;
     transition: transform 0.2s;
 }
 
@@ -58,7 +58,7 @@ body, html {
 
 /* GAME SCREEN */
 #game-screen {
-    background-image: url('../assets/images/bg/classroom_floor.jpg');
+    background-image: url('../assets/images/bg/Classroom-Floor.png');
     background-size: cover;
     background-position: center;
 }
@@ -78,6 +78,7 @@ body, html {
 
 #game-layout {
     display: flex;
+    flex-direction: row;
     width: 100%;
     height: 100%;
     padding-top: 60px;
@@ -118,9 +119,9 @@ body, html {
 #conveyor-container {
     position: relative;
     width: 70%;
-    height: 250px;
+    height: 35vh; 
     margin-top: auto;
-    margin-bottom: 10%;
+    margin-bottom: auto;
     overflow: hidden;
 }
 
@@ -163,8 +164,10 @@ body, html {
 
 .game-item {
     position: absolute;
-    width: 80px; 
-    height: 80px;
+    width: 8vw; 
+    height: 8vw;
+    max-width: 80px;
+    max-height: 80px;
     top: 50%;
     transform: translateY(-50%);
     cursor: grab;
@@ -186,7 +189,7 @@ body, html {
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
-    padding-right: 20px;
+    padding-right: 2vw;
 }
 
 .box-wrapper {
@@ -194,17 +197,19 @@ body, html {
     align-items: center;
     justify-content: flex-end;
     width: 100%;
-    height: 180px; 
+    height: 25vh; 
 }
 
 .tally-board {
-    width: 140px;
-    height: 160px;
+    width: 12vw;
+    min-width: 120px;
+    height: 16vh;
+    min-height: 140px;
     background-image: url('../ui/tally_bg.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
     background-position: center;
-    margin-right: 10px;
+    margin-right: 1vw;
     padding: 20px 15px;
     box-sizing: border-box;
     color: #333;
@@ -216,8 +221,10 @@ body, html {
 }
 
 .drop-box {
-    width: 180px;
-    height: 180px;
+    width: 15vw;
+    height: 15vw;
+    max-width: 180px;
+    max-height: 180px;
     background-image: url('../ui/box_empty.png');
     background-size: contain;
     background-repeat: no-repeat;
@@ -280,4 +287,62 @@ button {
 
 button:hover {
     background: #5c3b1e;
+}
+
+/* MOBILE RESPONSIVE LAYOUT */
+@media screen and (max-width: 768px), screen and (orientation: portrait) {
+    #game-layout {
+        flex-direction: column;
+        padding-top: 50px;
+    }
+    
+    #game-ui-header {
+        font-size: 1.1rem;
+        top: 5px; left: 10px; right: 10px;
+    }
+
+    #conveyor-container {
+        width: 100%;
+        height: 25vh;
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+
+    #boxes-container {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: space-evenly;
+        padding-right: 0;
+        padding-bottom: 10px;
+        flex-grow: 1;
+    }
+
+    .box-wrapper {
+        flex-direction: column-reverse; 
+        width: 30%;
+        justify-content: flex-start;
+        height: auto;
+    }
+
+    .tally-board {
+        width: 100%;
+        min-width: unset;
+        height: auto;
+        min-height: 100px;
+        margin-right: 0;
+        margin-top: 10px;
+        padding: 10px 5px;
+        font-size: 0.70rem;
+    }
+
+    .drop-box {
+        width: 25vw;
+        height: 25vw;
+    }
+
+    .game-item {
+        width: 15vw;
+        height: 15vw;
+    }
 }
