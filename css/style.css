@@ -4,7 +4,7 @@ body, html {
     padding: 0;
     width: 100%;
     height: 100%;
-    background-color: #111;
+    background-color: #000;
     font-family: 'Georgia', serif;
     overflow: hidden;
     user-select: none;
@@ -23,35 +23,39 @@ body, html {
     display: block;
 }
 
+.screen.active.flex-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 /* INTRO SCREEN */
 #intro-screen {
     background-image: url('../ui/title_bg.png');
     background-size: cover;
-    background-position: center;
+    background-position: center top;
 }
 
-#intro-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
+.intro-spacer {
+    height: 15vh; /* Leaves space for the "Trade & Tally Class" title burned into the BG */
     width: 100%;
-    height: 100%;
-    background-image: url('../ui/intro_screen.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
+}
+
+#intro-text-img {
+    max-height: 55vh; 
+    object-fit: contain;
+    margin-bottom: 30px;
     opacity: 0;
-    animation: fadeIn 2s forwards 0.5s;
+    animation: fadeIn 1.5s forwards 0.5s;
 }
 
 #start-btn {
+    height: 60px;
     cursor: pointer;
-    margin-bottom: 5%;
-    width: 200px; 
     transition: transform 0.2s;
+    opacity: 0;
+    animation: fadeIn 1.5s forwards 1s;
 }
 
 #start-btn:hover {
@@ -170,29 +174,30 @@ body, html {
     align-items: center;
     justify-content: flex-end;
     width: 100%;
-    height: 200px;
+    height: 180px; /* Scaled slightly to ensure 3 boxes fit cleanly */
 }
 
 .tally-board {
-    width: 150px;
-    height: 180px;
+    width: 140px;
+    height: 160px;
     background-image: url('../ui/tally_bg.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
     background-position: center;
     margin-right: 10px;
-    padding: 20px;
+    padding: 20px 15px;
     box-sizing: border-box;
     color: #333;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: bold;
     display: flex;
     flex-direction: column;
+    justify-content: center;
 }
 
 .drop-box {
-    width: 200px;
-    height: 200px;
+    width: 180px;
+    height: 180px;
     background-image: url('../ui/box_empty.png');
     background-size: contain;
     background-repeat: no-repeat;
@@ -209,17 +214,10 @@ body, html {
     text-decoration: line-through;
 }
 
-/* GAME OVER & VICTORY */
-#game-over-screen, #victory-screen {
+/* OVERLAY SCREENS */
+.overlay-bg {
     background-color: rgba(0, 0, 0, 0.9);
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
     color: #e3d2b9;
-}
-
-#game-over-screen.active, #victory-screen.active {
-    display: flex;
 }
 
 #game-over-img {
@@ -231,6 +229,15 @@ body, html {
     font-size: 1.5rem;
     color: red;
     margin-bottom: 20px;
+    text-align: center;
+}
+
+.results-content, .victory-content {
+    text-align: center;
+    border: 2px solid #e3d2b9;
+    background: #1a1008;
+    padding: 40px;
+    border-radius: 10px;
 }
 
 button {
@@ -241,6 +248,7 @@ button {
     border: 2px solid #e3d2b9;
     cursor: pointer;
     font-family: inherit;
+    margin-top: 20px;
 }
 
 button:hover {
