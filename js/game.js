@@ -6,8 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const gameOverScreen = document.getElementById("game-over-screen");
     const roundResultsScreen = document.getElementById("round-results-screen");
     const victoryScreen = document.getElementById("victory-screen");
+    const beginOverlay = document.getElementById("begin-overlay");
     
     const startBtn = document.getElementById("start-btn");
+    const beginBtn = document.getElementById("begin-btn");
     const restartBtn = document.getElementById("restart-btn");
     const nextRoundBtn = document.getElementById("next-round-btn");
     
@@ -60,23 +62,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     startBtn.addEventListener("click", () => {
         introScreen.classList.remove("active");
-        startRound(1);
+        setupRound(1);
+    });
+
+    beginBtn.addEventListener("click", () => {
+        beginOverlay.style.display = 'none';
+        startGameplay();
     });
 
     restartBtn.addEventListener("click", () => {
         gameOverScreen.classList.remove("active");
         score = 0;
-        startRound(1);
+        setupRound(1);
     });
 
     nextRoundBtn.addEventListener("click", () => {
         roundResultsScreen.classList.remove("active");
-        startRound(currentRound + 1);
+        setupRound(currentRound + 1);
     });
 
-    function startRound(round) {
+    function setupRound(round) {
         currentRound = round;
-        gameActive = true;
         activeItems = [];
         activeBoxesData = {};
         boxIdCounter = 0;
@@ -88,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         itemTrack.innerHTML = '';
         boxesContainer.innerHTML = '';
+        beginOverlay.style.display = 'flex'; 
 
         roundDisplay.innerText = `Round: ${currentRound} / 10`;
         truckDisplay.innerText = `On the Truck: 0 / ${totalBoxesThisRound}`;
@@ -99,7 +106,10 @@ document.addEventListener("DOMContentLoaded", () => {
         maintainBoxes();
         
         movingBelt.style.animationDuration = `${10 / beltSpeed}s`;
-        
+    }
+
+    function startGameplay() {
+        gameActive = true;
         spawnTimer = setInterval(spawnItem, spawnRate);
         requestAnimationFrame(updateGame);
     }
@@ -211,11 +221,13 @@ document.addEventListener("DOMContentLoaded", () => {
         itemEl.style.backgroundImage = `url('assets/images/items/${category}/${itemFile}')`;
         itemEl.dataset.category = category;
         itemEl.dataset.filename = itemFile;
-        itemEl.style.left = '-80px';
+        
+        let startX = itemTrack.offsetWidth;
+        itemEl.style.left = startX + 'px';
         
         itemTrack.appendChild(itemEl);
         
-        let itemObj = { el: itemEl, x: -80, isDragging: false };
+        let itemObj = { el: itemEl, x: startX, isDragging: false };
         activeItems.push(itemObj);
 
         setupDrag(itemObj);
@@ -227,12 +239,11 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let i = activeItems.length - 1; i >= 0; i--) {
             let item = activeItems[i];
             if (!item.isDragging) {
-                item.x += beltSpeed;
+                item.x -= beltSpeed; // Move Left
                 item.el.style.left = item.x + 'px';
                 item.el.style.top = '50%'; 
 
-                let trackWidth = itemTrack.offsetWidth;
-                if (item.x > trackWidth) {
+                if (item.x < -80) { // Off screen left
                     item.el.remove();
                     activeItems.splice(i, 1);
                 }
@@ -335,7 +346,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Valid Drop
             reqData.count++;
             let tallyLi = document.getElementById(`tally-${targetBoxId}-${filename}`);
             let displayName = getDisplayName(filename);
@@ -363,7 +373,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (allComplete) {
-            // Box is shipped!
             score += 20;
             boxesShippedThisRound++;
             activeBoxesCount--;
