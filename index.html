@@ -3,81 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Class 2: Trade & Tally</title>
+    <title>Trade & Tally Class</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
     <!-- INTRO / TUTORIAL SCREEN -->
     <div id="intro-screen" class="screen active">
-        <!-- We will use your custom intro background image here via CSS -->
-        <div class="intro-board">
-            <h2>Welcome to Trade & Tally</h2>
-            <p class="teacher-dialogue">"Alright, little ones, gather 'round the workbench! In this economy, Fae are known for a barter and trade system. These boxes need to have the correct items in order to be shipped for trade. You must look very closely and only take exactly what we need. Let's see how sharp those eyes are!"</p>
-            
-            <p class="instructions">
-                Watch the workshop belt closely. Drag and drop the requested parts into their matching shipment boxes. Keep an eye on the tally!
-            </p>
-            
-            <div class="rules-box">
-                <strong>Rules for the Workshop:</strong>
-                <ul>
-                    <li>Do not pack junk items. We only trade useful goods!</li>
-                    <li>Do not put an item in the wrong box.</li>
-                    <li>Do not overfill a box past its required number. Exactly as requested!</li>
-                    <li>Do not let a required item fall off the belt!</li>
-                </ul>
-                <p class="warning"><em>One mistake, and the whole shipment is ruined, and you will have to start over from Round 1!</em></p>
-            </div>
-            
-            <button id="start-btn">Begin Shift</button>
+        <div id="intro-overlay">
+            <img id="start-btn" src="ui/start_btn.png" alt="Start Lesson">
         </div>
     </div>
 
     <!-- MAIN GAME BOARD -->
     <div id="game-screen" class="screen">
         
-        <!-- UI HEADER (Score & Round) -->
         <div id="game-ui-header">
             <div id="round-display">Round: 1 / 10</div>
             <div id="score-display">Score: 0 / 2000</div>
         </div>
         
-        <!-- THE CONVEYOR BELT -->
-        <div id="conveyor-container">
-            <div id="moving-belt"></div>
-            <div id="static-frame"></div>
-            
-            <!-- Items will spawn inside this track -->
-            <div id="item-track"></div> 
-        </div>
+        <div id="game-layout">
+            <!-- LEFT/CENTER: CONVEYOR BELT -->
+            <div id="conveyor-container">
+                <div id="moving-belt"></div>
+                <div id="static-frame"></div>
+                <!-- Items spawn here -->
+                <div id="item-track"></div> 
+            </div>
 
-        <!-- THE DROP BOXES -->
-        <!-- These are generated dynamically by JS based on the round, this is just the container -->
-        <div id="boxes-container"></div>
+            <!-- RIGHT: DROP BOXES -->
+            <div id="boxes-container"></div>
+        </div>
 
     </div>
 
     <!-- GAME OVER SCREEN -->
     <div id="game-over-screen" class="screen">
-        <div class="game-over-content">
-            <h2>Shipment Ruined!</h2>
-            <p id="fail-reason-text">You packed a junk item!</p>
-            <p>Score: <span id="final-score">0</span></p>
-            <button id="restart-btn">Try Again</button>
-        </div>
+        <img id="game-over-img" src="ui/game-over-screen.png" alt="Shipment Ruined">
+        <p id="fail-reason-text"></p>
+        <button id="restart-btn">Try Again</button>
     </div>
 
     <!-- VICTORY SCREEN -->
     <div id="victory-screen" class="screen">
         <div class="victory-content">
             <h2>Class Complete!</h2>
-            <p>You have perfectly packed all 10 shipments!</p>
+            <p>You have perfectly packed all shipments.</p>
             <p>Final Score: 2000 / 2000</p>
             <button id="return-hub-btn">Return to Hub (+100 EXP)</button>
         </div>
     </div>
 
-    <script type="module" src="js/game.js"></script>
+    <script src="js/game.js"></script>
 </body>
 </html>
