@@ -25,10 +25,10 @@ body, html {
 
 /* INTRO SCREEN */
 #intro-screen {
-    background-image: url('../ui/intro_safezone.png'), url('../assets/images/bg/Classroom-Floor.png');
-    background-size: contain, cover;
-    background-position: center, center;
-    background-repeat: no-repeat, no-repeat;
+    background-image: url('../ui/intro_safezone.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     background-color: #000; 
 }
 
@@ -37,7 +37,7 @@ body, html {
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    padding-bottom: 4vh;
+    padding-bottom: 8vh;
 }
 
 #start-btn {
