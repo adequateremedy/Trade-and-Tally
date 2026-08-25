@@ -33,11 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
         navigation: ['Lantern.png', 'Matchbox.png', 'Compass.png', 'Spyglass.png', 'Pocket_Watch.png', 'Monocle.png', 'Oil_Flask.png', 'Magnifying_Lens.png', 'Sundial.png', 'Sextant.png'] // JUNK
     };
 
-    const pointsPerRound = [100, 100, 150, 150, 200, 200, 250, 250, 300, 300];
-
-    // Drag State
-    let draggedItem = null;
-    let offsetX = 0, offsetY = 0;
+    // Exactly 100 items total across 10 rounds to reach 2000 points (20 pts per item)
+    const itemsPerRound = [5, 6, 7, 8, 9, 10, 11, 12, 15, 17];
 
     startBtn.addEventListener("click", () => {
         introScreen.classList.remove("active");
@@ -80,24 +77,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let categoriesToUse = [];
         let junkChance = 0;
+        let totalItemsThisRound = itemsPerRound[currentRound - 1];
 
         if (currentRound === 1) { categoriesToUse = ['mechanical_parts']; }
-        else if (currentRound === 2) { categoriesToUse = ['mechanical_parts', 'tools']; }
-        else if (currentRound === 3) { categoriesToUse = ['mechanical_parts', 'tools']; junkChance = 0.2; }
+        else if (currentRound <= 3) { categoriesToUse = ['mechanical_parts', 'tools']; junkChance = currentRound === 3 ? 0.2 : 0; }
         else if (currentRound <= 8) { categoriesToUse = ['mechanical_parts', 'tools', 'raw_materials']; junkChance = 0.3; }
         else { categoriesToUse = ['mechanical_parts', 'tools', 'raw_materials', 'gears_cogs']; junkChance = 0.4; }
 
+        currentTallies.junkChance = junkChance;
+
         categoriesToUse.forEach(cat => {
             currentTallies[cat] = { req: {}, totalMet: false };
-            let numTypes = currentRound < 5 ? 2 : 3;
-            for(let i=0; i<numTypes; i++) {
-                let randomItem = itemsData[cat][Math.floor(Math.random() * itemsData[cat].length)];
-                let reqAmount = Math.floor(Math.random() * 3) + 1;
-                currentTallies[cat].req[randomItem] = { count: 0, required: reqAmount };
-            }
         });
 
-        currentTallies.junkChance = junkChance;
+        // Distribute the exact number of required items across the chosen categories
+        for (let i = 0; i < totalItemsThisRound; i++) {
+            let cat = categoriesToUse[i % categoriesToUse.length];
+            let existingItems = Object.keys(currentTallies[cat].req);
+            let itemFile;
+
+            // Limit unique items per category to 3 so it fits visually on the tally board
+            if (existingItems.length > 0 && Math.random() > 0.5 && existingItems.length >= 2) {
+                itemFile = existingItems[Math.floor(Math.random() * existingItems.length)];
+            } else if (existingItems.length < 3) {
+                let available = itemsData[cat].filter(item => !existingItems.includes(item));
+                itemFile = available[Math.floor(Math.random() * available.length)];
+            } else {
+                itemFile = existingItems[Math.floor(Math.random() * existingItems.length)];
+            }
+
+            if (!currentTallies[cat].req[itemFile]) {
+                currentTallies[cat].req[itemFile] = { count: 0, required: 0 };
+            }
+            currentTallies[cat].req[itemFile].required++;
+        }
     }
 
     function buildBoxes() {
@@ -148,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if(activeCats.length === 0) return;
             category = activeCats[Math.floor(Math.random() * activeCats.length)];
             
-            // Try to spawn needed items
+            // Spawn required items heavily
             let neededItems = Object.keys(currentTallies[category].req).filter(item => 
                 currentTallies[category].req[item].count < currentTallies[category].req[item].required
             );
@@ -183,11 +196,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!item.isDragging) {
                 item.x += beltSpeed;
                 item.el.style.left = item.x + 'px';
-                item.el.style.top = '50%'; // Snap back to center of belt if dropped on it
+                item.el.style.top = '50%'; 
 
                 let trackWidth = itemTrack.offsetWidth;
                 if (item.x > trackWidth) {
-                    // Check if it fell off right side
                     if (item.dataset.category !== 'navigation') {
                         let cat = item.dataset.category;
                         if(currentTallies[cat] && currentTallies[cat].req[item.dataset.filename]) {
@@ -209,6 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setupDrag(itemObj) {
         let el = itemObj.el;
+        let offsetX = 0, offsetY = 0;
         
         const startDrag = (e) => {
             if (!gameActive) return;
@@ -226,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault(); 
             let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
             let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-            el.style.position = 'fixed'; // Break out of container to drag everywhere
+            el.style.position = 'fixed'; 
             el.style.left = (clientX - offsetX) + 'px';
             el.style.top = (clientY - offsetY) + 'px';
         };
@@ -259,15 +272,12 @@ document.addEventListener("DOMContentLoaded", () => {
         let category = el.dataset.category;
         let filename = el.dataset.filename;
 
-        // Check if dropped on belt
         let beltRect = document.getElementById('conveyor-container').getBoundingClientRect();
         if (dropX >= beltRect.left && dropX <= beltRect.right && dropY >= beltRect.top && dropY <= beltRect.bottom) {
-            // Snap back to belt coordinates
             itemObj.x = dropX - beltRect.left; 
             return;
         }
 
-        // Check boxes
         let boxes = document.querySelectorAll('.drop-box');
         let droppedInBox = null;
 
@@ -302,6 +312,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Valid Drop
             reqData.count++;
+            score += 20;
+            scoreDisplay.innerText = `Score: ${score} / 2000`;
+
             let tallyLi = document.getElementById(`tally-${filename}`);
             tallyLi.innerText = `${filename.split('.')[0]}: ${reqData.count} / ${reqData.required}`;
             
@@ -313,7 +326,6 @@ document.addEventListener("DOMContentLoaded", () => {
             activeItems = activeItems.filter(i => i !== itemObj);
             checkRoundComplete();
         } else {
-            // Dropped on floor
             gameOver("You dropped an item on the floor!");
         }
     }
@@ -333,8 +345,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (allComplete) {
             gameActive = false;
             clearInterval(spawnTimer);
-            score += pointsPerRound[currentRound - 1];
-            scoreDisplay.innerText = `Score: ${score} / 2000`;
             
             setTimeout(() => {
                 if (currentRound < 10) {
