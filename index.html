@@ -9,10 +9,10 @@
 <body>
 
     <!-- INTRO / TUTORIAL SCREEN -->
-    <div id="intro-screen" class="screen active">
-        <div id="intro-overlay">
-            <img id="start-btn" src="ui/start_btn.png" alt="Start Lesson">
-        </div>
+    <div id="intro-screen" class="screen active flex-column">
+        <div class="intro-spacer"></div>
+        <img id="intro-text-img" src="ui/intro_screen.png" alt="Instructions">
+        <img id="start-btn" src="ui/start_btn.png" alt="Start Lesson">
     </div>
 
     <!-- MAIN GAME BOARD -->
@@ -20,6 +20,7 @@
         
         <div id="game-ui-header">
             <div id="round-display">Round: 1 / 10</div>
+            <div id="truck-display">On the Truck: 0 / 5</div>
             <div id="score-display">Score: 0 / 2000</div>
         </div>
         
@@ -28,7 +29,6 @@
             <div id="conveyor-container">
                 <div id="moving-belt"></div>
                 <div id="static-frame"></div>
-                <!-- Items spawn here -->
                 <div id="item-track"></div> 
             </div>
 
@@ -38,15 +38,24 @@
 
     </div>
 
+    <!-- ROUND RESULTS SCREEN -->
+    <div id="round-results-screen" class="screen flex-column overlay-bg">
+        <div class="results-content">
+            <h2 id="results-title">Round Complete!</h2>
+            <p id="results-stats"></p>
+            <button id="next-round-btn">Next Round</button>
+        </div>
+    </div>
+
     <!-- GAME OVER SCREEN -->
-    <div id="game-over-screen" class="screen">
+    <div id="game-over-screen" class="screen flex-column overlay-bg">
         <img id="game-over-img" src="ui/game-over-screen.png" alt="Shipment Ruined">
         <p id="fail-reason-text"></p>
         <button id="restart-btn">Try Again</button>
     </div>
 
     <!-- VICTORY SCREEN -->
-    <div id="victory-screen" class="screen">
+    <div id="victory-screen" class="screen flex-column overlay-bg">
         <div class="victory-content">
             <h2>Class Complete!</h2>
             <p>You have perfectly packed all shipments.</p>
