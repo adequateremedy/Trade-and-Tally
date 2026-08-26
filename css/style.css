@@ -1,3 +1,8 @@
+/* css/style.css */
+/* ============================================================
+   GLOBAL RESET
+   ============================================================ */
+
 html,
 body {
     margin: 0;
@@ -89,11 +94,11 @@ body {
     position: absolute;
 
     left: 50%;
-    bottom: 8vh;
+    bottom: 3vh;
 
     transform: translateX(-50%);
 
-    width: 300px;
+    width: 150px;
     max-width: 35vw;
 
     height: auto;
@@ -516,7 +521,7 @@ button:hover {
 
         max-width: none;
 
-        bottom: 6vh;
+        bottom: -3vh;
     }
 
     /* GAME LAYOUT */
