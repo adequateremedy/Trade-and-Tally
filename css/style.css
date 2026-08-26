@@ -1,603 +1,136 @@
-/* css/style.css */
-/* ============================================================
-   GLOBAL RESET
-   ============================================================ */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade & Tally Class</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
 
-html,
-body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background: #000;
-    font-family: 'Georgia', serif;
-    overflow: hidden;
-    user-select: none;
-}
+<body>
 
+    <!-- =========================================================
+         INTRO SCREEN
+         The intro graphic fills the entire viewport.
+         The Start Lesson button sits ON TOP of the image.
+         ========================================================= -->
+    <div id="intro-screen" class="screen active">
 
-/* ============================================================
-   SCREEN SYSTEM
-   ============================================================ */
+        <img
+            id="intro-graphic"
+            src="ui/intro_safezone.png"
+            alt="Trade and Tally Class"
+        >
 
-.screen {
-    display: none;
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-}
+        <img
+            id="start-btn"
+            src="ui/start_btn.png"
+            alt="Start Lesson"
+        >
 
-.screen.active {
-    display: block;
-}
+    </div>
 
 
-/* ============================================================
-   INTRO SCREEN
-   ============================================================ */
+    <!-- =========================================================
+         MAIN GAME BOARD
+         ========================================================= -->
+    <div id="game-screen" class="screen">
 
-#intro-screen {
-    position: fixed;
-    inset: 0;
+        <div id="game-ui-header">
+            <div id="round-display">Round: 1 / 10</div>
+            <div id="truck-display">On the Truck: 0 / 5</div>
+            <div id="score-display">Score: 0 / 2000</div>
+        </div>
 
-    width: 100vw;
-    height: 100vh;
+        <div id="game-layout">
 
-    margin: 0;
-    padding: 0;
+            <!-- BEGIN ROUND OVERLAY -->
+            <div id="begin-overlay">
+                <button id="begin-btn">Begin</button>
+            </div>
 
-    background: #000;
+            <!-- CONVEYOR BELT -->
+            <div id="conveyor-container">
+                <div id="moving-belt"></div>
+                <div id="static-frame"></div>
+                <div id="item-track"></div>
+            </div>
 
-    overflow: hidden;
+            <!-- DROP BOXES -->
+            <div id="boxes-container"></div>
 
-    display: none;
-}
+        </div>
 
-#intro-screen.active {
-    display: block;
-}
+    </div>
 
 
-/* ============================================================
-   INTRO GRAPHIC
-   ============================================================ */
+    <!-- =========================================================
+         ROUND RESULTS SCREEN
+         ========================================================= -->
+    <div id="round-results-screen" class="screen overlay-bg">
 
-#intro-graphic {
-    position: absolute;
+        <div class="results-content">
 
-    top: 0;
-    left: 0;
+            <h2 id="results-title">Round Complete!</h2>
 
-    width: 100vw;
-    height: 100vh;
+            <p id="results-stats"></p>
 
-    max-width: none;
-    max-height: none;
+            <button id="next-round-btn">
+                Next Round
+            </button>
 
-    margin: 0;
-    padding: 0;
+        </div>
 
-    object-fit: contain;
+    </div>
 
-    display: block;
 
-    z-index: 1;
-}
+    <!-- =========================================================
+         GAME OVER SCREEN
+         ========================================================= -->
+    <div id="game-over-screen" class="screen overlay-bg">
 
+        <img
+            id="game-over-img"
+            src="ui/game-over-screen.png"
+            alt="Shipment Ruined"
+        >
 
-/* ============================================================
-   START LESSON BUTTON
-   ============================================================ */
+        <p id="fail-reason-text"></p>
 
-#start-btn {
-    position: absolute;
+        <button id="restart-btn">
+            Try Again
+        </button>
 
-    left: 50%;
-    bottom: 2vh;
+    </div>
 
-    transform: translateX(-50%);
 
-    width: 300px;
-    max-width: 35vw;
+    <!-- =========================================================
+         VICTORY SCREEN
+         ========================================================= -->
+    <div id="victory-screen" class="screen overlay-bg">
 
-    height: auto;
+        <div class="victory-content">
 
-    margin: 0;
+            <h2>Class Complete!</h2>
 
-    cursor: pointer;
+            <p>
+                You have perfectly packed all shipments.
+            </p>
 
-    z-index: 10;
+            <p>
+                Final Score: 2000 / 2000
+            </p>
 
-    transition: transform 0.2s ease;
-}
+            <button id="return-hub-btn">
+                Return to Hub (+100 EXP)
+            </button>
 
-#start-btn:hover {
-    transform: translateX(-50%) scale(1.05);
-}
+        </div>
 
+    </div>
 
-/* ============================================================
-   GAME SCREEN
-   ============================================================ */
 
-#game-screen {
-    background-image: url('../assets/images/bg/Classroom-Floor.png');
-    background-size: cover;
-    background-position: center;
-}
+    <script src="js/game.js"></script>
 
-
-/* ============================================================
-   GAME HEADER
-   ============================================================ */
-
-#game-ui-header {
-    position: absolute;
-
-    top: 10px;
-    left: 20px;
-    right: 20px;
-
-    display: flex;
-    justify-content: space-between;
-
-    font-size: 1.5rem;
-
-    color: #e3d2b9;
-
-    text-shadow: 2px 2px 4px #000;
-
-    z-index: 10;
-}
-
-
-/* ============================================================
-   GAME LAYOUT
-   ============================================================ */
-
-#game-layout {
-    display: flex;
-
-    flex-direction: row;
-
-    width: 100%;
-    height: 100%;
-
-    padding-top: 60px;
-
-    box-sizing: border-box;
-
-    position: relative;
-}
-
-
-/* ============================================================
-   BEGIN ROUND OVERLAY
-   ============================================================ */
-
-#begin-overlay {
-    position: absolute;
-
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    background: rgba(0, 0, 0, 0.6);
-
-    display: flex;
-
-    justify-content: center;
-    align-items: center;
-
-    z-index: 100;
-}
-
-#begin-btn {
-    padding: 15px 40px;
-
-    font-size: 2rem;
-
-    background: #7F522B;
-
-    color: #fff;
-
-    border: 3px solid #e3d2b9;
-
-    border-radius: 8px;
-
-    cursor: pointer;
-
-    font-weight: bold;
-
-    text-transform: uppercase;
-
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
-
-    transition:
-        transform 0.2s,
-        background 0.2s;
-}
-
-#begin-btn:hover {
-    background: #5c3b1e;
-
-    transform: scale(1.05);
-}
-
-
-/* ============================================================
-   CONVEYOR
-   ============================================================ */
-
-#conveyor-container {
-    position: relative;
-
-    width: 70%;
-    height: 35vh;
-
-    margin-top: auto;
-    margin-bottom: auto;
-
-    overflow: hidden;
-}
-
-#moving-belt {
-    position: absolute;
-
-    top: 10px;
-    left: 0;
-
-    width: 200%;
-    height: calc(100% - 20px);
-
-    background-image: url('../ui/Belt.png');
-
-    background-repeat: repeat-x;
-
-    background-size: contain;
-
-    animation: scrollBelt linear infinite;
-}
-
-#static-frame {
-    position: absolute;
-
-    top: 0;
-    left: 0;
-
-    width: 100%;
-    height: 100%;
-
-    background-image: url('../ui/Conveyor.png');
-
-    background-repeat: repeat-x;
-
-    background-size: contain;
-
-    pointer-events: none;
-}
-
-@keyframes scrollBelt {
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(-50%);
-    }
-}
-
-
-/* ============================================================
-   ITEM TRACK
-   ============================================================ */
-
-#item-track {
-    position: absolute;
-
-    top: 0;
-    left: 0;
-
-    width: 100%;
-    height: 100%;
-}
-
-.game-item {
-    position: absolute;
-
-    width: 8vw;
-    height: 8vw;
-
-    max-width: 80px;
-    max-height: 80px;
-
-    top: 50%;
-
-    transform: translateY(-50%);
-
-    cursor: grab;
-
-    background-size: contain;
-
-    background-repeat: no-repeat;
-
-    background-position: center;
-
-    z-index: 5;
-}
-
-.game-item:active {
-    cursor: grabbing;
-}
-
-
-/* ============================================================
-   DROP BOXES
-   ============================================================ */
-
-#boxes-container {
-    width: 30%;
-    height: 100%;
-
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: space-evenly;
-
-    align-items: center;
-
-    padding-right: 2vw;
-}
-
-.box-wrapper {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: flex-end;
-
-    width: 100%;
-    height: 25vh;
-}
-
-.tally-board {
-    width: 12vw;
-
-    min-width: 120px;
-
-    height: 16vh;
-
-    min-height: 140px;
-
-    background-image: url('../ui/tally_bg.png');
-
-    background-size: 100% 100%;
-
-    background-repeat: no-repeat;
-
-    background-position: center;
-
-    margin-right: 1vw;
-
-    padding: 20px 15px;
-
-    box-sizing: border-box;
-
-    color: #333;
-
-    font-size: 0.85rem;
-
-    font-weight: bold;
-
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: center;
-}
-
-.drop-box {
-    width: 15vw;
-    height: 15vw;
-
-    max-width: 180px;
-    max-height: 180px;
-
-    background-image: url('../ui/box_empty.png');
-
-    background-size: contain;
-
-    background-repeat: no-repeat;
-
-    background-position: center;
-
-    position: relative;
-}
-
-.tally-item {
-    margin-bottom: 5px;
-}
-
-.tally-item.complete {
-    color: green;
-    text-decoration: line-through;
-}
-
-
-/* ============================================================
-   OVERLAY SCREENS
-   ============================================================ */
-
-.overlay-bg {
-    background-color: rgba(0, 0, 0, 0.9);
-
-    color: #e3d2b9;
-}
-
-.screen.active.overlay-bg {
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: center;
-
-    align-items: center;
-}
-
-#game-over-img {
-    max-width: 80%;
-
-    margin-bottom: 20px;
-}
-
-#fail-reason-text {
-    font-size: 1.5rem;
-
-    color: red;
-
-    margin-bottom: 20px;
-
-    text-align: center;
-}
-
-.results-content,
-.victory-content {
-    text-align: center;
-
-    border: 2px solid #e3d2b9;
-
-    background: #1a1008;
-
-    padding: 40px;
-
-    border-radius: 10px;
-}
-
-button {
-    padding: 10px 20px;
-
-    font-size: 1.2rem;
-
-    background: #7F522B;
-
-    color: #fff;
-
-    border: 2px solid #e3d2b9;
-
-    cursor: pointer;
-
-    font-family: inherit;
-
-    margin-top: 20px;
-}
-
-button:hover {
-    background: #5c3b1e;
-}
-
-
-/* ============================================================
-   MOBILE / TABLET
-   ============================================================ */
-
-@media screen and (max-width: 768px),
-       screen and (orientation: portrait) {
-
-    #intro-graphic {
-        width: 100vw;
-        height: 100vh;
-
-        max-width: none;
-        max-height: none;
-
-        object-fit: contain;
-    }
-
-    #start-btn {
-        width: min(300px, 55vw);
-
-        max-width: none;
-
-        bottom: 2vh;
-    }
-
-    /* GAME LAYOUT */
-
-    #game-layout {
-        flex-direction: column;
-
-        padding-top: 50px;
-    }
-
-    #game-ui-header {
-        font-size: 1.1rem;
-
-        top: 5px;
-        left: 10px;
-        right: 10px;
-    }
-
-    #conveyor-container {
-        width: 100%;
-
-        height: 25vh;
-
-        margin-top: 0;
-        margin-bottom: 15px;
-    }
-
-    #boxes-container {
-        width: 100%;
-
-        height: auto;
-
-        flex-direction: row;
-
-        justify-content: space-evenly;
-
-        padding-right: 0;
-        padding-bottom: 10px;
-
-        flex-grow: 1;
-    }
-
-    .box-wrapper {
-        flex-direction: column-reverse;
-
-        width: 30%;
-
-        justify-content: flex-start;
-
-        height: auto;
-    }
-
-    .tally-board {
-        width: 100%;
-
-        min-width: unset;
-
-        height: auto;
-
-        min-height: 100px;
-
-        margin-right: 0;
-        margin-top: 10px;
-
-        padding: 10px 5px;
-
-        font-size: 0.70rem;
-    }
-
-    .drop-box {
-        width: 25vw;
-        height: 25vw;
-    }
-
-    .game-item {
-        width: 15vw;
-        height: 15vw;
-    }
-}
+</body>
+</html>
