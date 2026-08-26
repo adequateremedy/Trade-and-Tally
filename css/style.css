@@ -593,6 +593,12 @@ button:hover {
         padding: 10px 5px;
 
         font-size: 0.70rem;
+        
+        line-height: 1.1;
+    }
+    
+    .tally-item {
+        margin-bottom: 1px;
     }
 
     .drop-box {
