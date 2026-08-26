@@ -94,7 +94,7 @@ body {
     position: absolute;
 
     left: 50%;
-    bottom: 0.5vh;
+    bottom: -3vh;
 
     transform: translateX(-50%);
 
@@ -521,7 +521,7 @@ button:hover {
 
         max-width: none;
 
-        bottom: 0.5vh;
+        bottom: -3vh;
     }
 
     /* GAME LAYOUT */
