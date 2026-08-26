@@ -1,8 +1,3 @@
-/* css/style.css */
-/* ============================================================
-   GLOBAL RESET
-   ============================================================ */
-
 html,
 body {
     margin: 0;
@@ -517,11 +512,11 @@ button:hover {
     }
 
     #start-btn {
-        width: min(300px, 55vw);
+        width: 150px;
 
         max-width: none;
 
-        bottom: -3vh;
+        bottom: 6vh;
     }
 
     /* GAME LAYOUT */
