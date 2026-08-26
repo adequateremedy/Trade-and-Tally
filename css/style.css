@@ -597,8 +597,8 @@ button:hover {
         line-height: 1.1;
     }
 
-    .tally-board > :first-child {
-        margin: 0;
+    .tally-board > div:first-child {
+        margin-bottom: 0 !important;
     }
     
     .tally-item {
