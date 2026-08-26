@@ -160,7 +160,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let tallyBoard = document.createElement('div');
         tallyBoard.className = 'tally-board';
-        tallyBoard.innerHTML = `<div style="margin-bottom:10px;">${boxData.category.replace('_', ' ').toUpperCase()}</div>`;
         
         let ul = document.createElement('ul');
         ul.style.listStyle = 'none';
