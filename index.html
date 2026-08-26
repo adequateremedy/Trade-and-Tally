@@ -16,11 +16,14 @@
          ========================================================= -->
     <div id="intro-screen" class="screen active">
 
-        <img
-            id="intro-graphic"
-            src="ui/intro_safezone.png"
-            alt="Trade and Tally Class"
-        >
+        <picture>
+            <source media="(max-width: 768px)" srcset="ui/intro_screen_mobile.png">
+            <img
+                id="intro-graphic"
+                src="ui/intro_screen_desktop.png"
+                alt="Trade and Tally Class"
+            >
+        </picture>
 
         <img
             id="start-btn"
