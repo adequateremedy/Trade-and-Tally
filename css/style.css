@@ -1,3 +1,8 @@
+/* css/style.css */
+/* ============================================================
+   GLOBAL RESET
+   ============================================================ */
+
 html,
 body {
     margin: 0;
@@ -392,6 +397,10 @@ body {
     flex-direction: column;
 
     justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
 }
 
 .drop-box {
