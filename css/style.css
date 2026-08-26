@@ -63,24 +63,6 @@ body {
    INTRO GRAPHIC
    ============================================================ */
 
-/*
-   THIS IS THE IMPORTANT PART.
-
-   The image is no longer being constrained to 75vh.
-   It is no longer sitting inside a flex column.
-   It is no longer sharing space with the Start button.
-
-   It occupies the entire viewport.
-
-   "fill" deliberately stretches the square artwork to the
-   exact dimensions of the user's screen so that there are:
-
-       NO BLACK BARS
-       NO EMPTY FLOOR AREA
-       NO UNUSED SCREEN SPACE
-       NO SHRUNK INTRO IMAGE
-*/
-
 #intro-graphic {
     position: absolute;
 
@@ -96,7 +78,7 @@ body {
     margin: 0;
     padding: 0;
 
-    object-fit: fill;
+    object-fit: contain;
 
     display: block;
 
@@ -108,19 +90,11 @@ body {
    START LESSON BUTTON
    ============================================================ */
 
-/*
-   The button is now OVER the intro image.
-
-   It does NOT take up space in the layout.
-
-   Therefore it cannot shrink the intro image.
-*/
-
 #start-btn {
     position: absolute;
 
     left: 50%;
-    bottom: 5vh;
+    bottom: 2vh;
 
     transform: translateX(-50%);
 
@@ -532,11 +506,6 @@ button:hover {
 @media screen and (max-width: 768px),
        screen and (orientation: portrait) {
 
-    /*
-       INTRO IMAGE STILL FILLS THE ENTIRE SCREEN.
-       Nothing here is allowed to shrink it.
-    */
-
     #intro-graphic {
         width: 100vw;
         height: 100vh;
@@ -544,21 +513,16 @@ button:hover {
         max-width: none;
         max-height: none;
 
-        object-fit: fill;
+        object-fit: contain;
     }
-
-    /*
-       Keep the button proportional on smaller screens.
-    */
 
     #start-btn {
         width: min(300px, 55vw);
 
         max-width: none;
 
-        bottom: 4vh;
+        bottom: 2vh;
     }
-
 
     /* GAME LAYOUT */
 
