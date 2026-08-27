@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,8 +12,6 @@
 
     <!-- =========================================================
          INTRO SCREEN
-         The intro graphic fills the entire viewport.
-         The Start Lesson button sits ON TOP of the image.
          ========================================================= -->
     <div id="intro-screen" class="screen active">
 
@@ -43,6 +42,7 @@
             <div id="round-display">Round: 1 / 10</div>
             <div id="truck-display">On the Truck: 0 / 5</div>
             <div id="score-display">Score: 0 / 2000</div>
+            <button id="pause-btn">Pause</button>
         </div>
 
         <div id="game-layout">
@@ -66,24 +66,26 @@
 
     </div>
 
+    <!-- =========================================================
+         PAUSE / GLOSSARY SCREEN
+         ========================================================= -->
+    <div id="pause-screen" class="screen overlay-bg">
+        <div class="pause-content">
+            <h2>Game Paused - Item Glossary</h2>
+            <div id="glossary-grid"></div>
+            <button id="resume-btn">Resume Game</button>
+        </div>
+    </div>
 
     <!-- =========================================================
          ROUND RESULTS SCREEN
          ========================================================= -->
     <div id="round-results-screen" class="screen overlay-bg">
-
         <div class="results-content">
-
             <h2 id="results-title">Round Complete!</h2>
-
             <p id="results-stats"></p>
-
-            <button id="next-round-btn">
-                Next Round
-            </button>
-
+            <button id="next-round-btn">Next Round</button>
         </div>
-
     </div>
 
 
@@ -91,19 +93,13 @@
          GAME OVER SCREEN
          ========================================================= -->
     <div id="game-over-screen" class="screen overlay-bg">
-
         <img
             id="game-over-img"
             src="ui/game-over-screen.png"
             alt="Shipment Ruined"
         >
-
         <p id="fail-reason-text"></p>
-
-        <button id="restart-btn">
-            Try Again
-        </button>
-
+        <button id="restart-btn">Try Again</button>
     </div>
 
 
@@ -111,25 +107,12 @@
          VICTORY SCREEN
          ========================================================= -->
     <div id="victory-screen" class="screen overlay-bg">
-
         <div class="victory-content">
-
             <h2>Class Complete!</h2>
-
-            <p>
-                You have perfectly packed all shipments.
-            </p>
-
-            <p>
-                Final Score: 2000 / 2000
-            </p>
-
-            <button id="return-hub-btn">
-                Return to Hub (+100 EXP)
-            </button>
-
+            <p>You have perfectly packed all shipments.</p>
+            <p>Final Score: 2000 / 2000</p>
+            <button id="return-hub-btn">Return to Hub (+100 EXP)</button>
         </div>
-
     </div>
 
     <!-- BACKGROUND MUSIC -->
