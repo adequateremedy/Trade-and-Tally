@@ -207,7 +207,15 @@ document.addEventListener("DOMContentLoaded", () => {
         let boxData = { category: category, req: {}, elementId: boxId };
         let numTypes = 2; 
         
-        let availableItems = [...itemsData[category]];
+        // Find items currently on the belt to avoid requesting them
+        let itemsOnBelt = activeItems.map(itemObj => itemObj.el.dataset.filename);
+        let availableItems = itemsData[category].filter(filename => !itemsOnBelt.includes(filename));
+        
+        // Fallback in case the belt somehow has too many items from this category
+        if (availableItems.length < numTypes) {
+            availableItems = [...itemsData[category]];
+        }
+
         for(let i=0; i<numTypes; i++) {
             let randIndex = Math.floor(Math.random() * availableItems.length);
             let itemFile = availableItems.splice(randIndex, 1)[0];
