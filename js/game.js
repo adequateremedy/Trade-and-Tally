@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let gameActive = false;
     let beltSpeed = 1.0; 
     let beltPos = 0;
-    let distanceSinceLastSpawn = 120; // Tracks pixels moved to determine spawn spacing
+    let distanceSinceLastSpawn = 250; // Tracks pixels moved to determine spawn spacing
     
     let activeItems = [];
     let activeBoxesData = {};
@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
         activeItems = [];
         activeBoxesData = {};
         boxIdCounter = 0;
-        distanceSinceLastSpawn = 120; // Resets spacing for a clean start
+        distanceSinceLastSpawn = 250; // Resets spacing for a clean start
         
         totalBoxesThisRound = boxesPerRound[currentRound - 1];
         boxesShippedThisRound = 0;
@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startGameplay() {
         gameActive = true;
-        distanceSinceLastSpawn = 120; // Force immediate spawn on first frame
+        distanceSinceLastSpawn = 250; // Force immediate spawn on first frame
         requestAnimationFrame(updateGame);
     }
 
@@ -283,7 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Distance-based spawning (spawns purely based on pixels moved to prevent bunching)
-        if (distanceSinceLastSpawn >= 120) {
+        if (distanceSinceLastSpawn >= 250) {
             spawnItem();
             distanceSinceLastSpawn = 0;
         }
