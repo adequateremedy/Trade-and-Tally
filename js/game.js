@@ -7,11 +7,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const roundResultsScreen = document.getElementById("round-results-screen");
     const victoryScreen = document.getElementById("victory-screen");
     const beginOverlay = document.getElementById("begin-overlay");
+    const pauseScreen = document.getElementById("pause-screen");
+    const glossaryGrid = document.getElementById("glossary-grid");
     
     const startBtn = document.getElementById("start-btn");
     const beginBtn = document.getElementById("begin-btn");
     const restartBtn = document.getElementById("restart-btn");
     const nextRoundBtn = document.getElementById("next-round-btn");
+    const pauseBtn = document.getElementById("pause-btn");
+    const resumeBtn = document.getElementById("resume-btn");
     
     const roundDisplay = document.getElementById("round-display");
     const truckDisplay = document.getElementById("truck-display");
@@ -29,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentRound = 1;
     let score = 0;
     let gameActive = false;
+    let isPaused = false;
     let beltSpeed = 1.0; 
     let beltPos = 0;
     let distanceSinceLastSpawn = 250; 
@@ -49,7 +54,9 @@ document.addEventListener("DOMContentLoaded", () => {
     bgMusic.addEventListener('ended', () => {
         currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
         bgMusic.src = playlist[currentTrackIndex];
-        bgMusic.play().catch(e => console.log(e));
+        if(!isPaused && gameActive) {
+            bgMusic.play().catch(e => console.log(e));
+        }
     });
 
     // Categories and Exactly Matched Items
@@ -70,6 +77,32 @@ document.addEventListener("DOMContentLoaded", () => {
         return filename.replace('-removebg-preview.png', '').replace('.png', '');
     }
 
+    // Auto-generate the Glossary Grid for the Pause Screen
+    function generateGlossary() {
+        glossaryGrid.innerHTML = '';
+        for (let category in itemsData) {
+            itemsData[category].forEach(filename => {
+                let itemDiv = document.createElement("div");
+                itemDiv.className = "glossary-item";
+                
+                let nameLabel = document.createElement("div");
+                nameLabel.className = "glossary-name";
+                nameLabel.innerText = getDisplayName(filename);
+                
+                let img = document.createElement("img");
+                img.src = `assets/images/items/${category}/${filename}`;
+                img.alt = getDisplayName(filename);
+                
+                itemDiv.appendChild(nameLabel);
+                itemDiv.appendChild(img);
+                glossaryGrid.appendChild(itemDiv);
+            });
+        }
+    }
+    
+    generateGlossary();
+
+    // Button Listeners
     startBtn.addEventListener("click", () => {
         introScreen.classList.remove("active");
         setupRound(1);
@@ -77,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     beginBtn.addEventListener("click", () => {
         beginOverlay.style.display = 'none';
+        isPaused = false;
         bgMusic.play().catch(e => console.log(e));
         startGameplay();
     });
@@ -94,12 +128,31 @@ document.addEventListener("DOMContentLoaded", () => {
         setupRound(currentRound + 1);
     });
 
+    // Pause functionality
+    pauseBtn.addEventListener("click", togglePause);
+    resumeBtn.addEventListener("click", togglePause);
+
+    function togglePause() {
+        if (!gameActive) return; // Only allow pause if game is actively running
+        
+        isPaused = !isPaused;
+        
+        if (isPaused) {
+            bgMusic.pause();
+            pauseScreen.classList.add("active");
+        } else {
+            pauseScreen.classList.remove("active");
+            bgMusic.play().catch(e => console.log(e));
+        }
+    }
+
     function setupRound(round) {
         currentRound = round;
         activeItems = [];
         activeBoxesData = {};
         boxIdCounter = 0;
         distanceSinceLastSpawn = 250; 
+        isPaused = false;
         
         totalBoxesThisRound = boxesPerRound[currentRound - 1];
         boxesShippedThisRound = 0;
@@ -109,6 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
         itemTrack.innerHTML = '';
         boxesContainer.innerHTML = '';
         beginOverlay.style.display = 'flex'; 
+        pauseScreen.classList.remove("active");
 
         roundDisplay.innerText = `Round: ${currentRound} / 10`;
         truckDisplay.innerText = `On the Truck: 0 / ${totalBoxesThisRound}`;
@@ -199,7 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function spawnItem() {
-        if (!gameActive) return;
+        if (!gameActive || isPaused) return;
 
         let isJunk = Math.random() < junkChance;
         let category, itemFile;
@@ -247,40 +301,43 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateGame() {
         if (!gameActive) return;
 
-        beltPos -= beltSpeed;
-        distanceSinceLastSpawn += beltSpeed;
-        movingBelt.style.backgroundPosition = `${beltPos}px 0`;
+        // Skip calculations if paused, but maintain the animation frame loop
+        if (!isPaused) {
+            beltPos -= beltSpeed;
+            distanceSinceLastSpawn += beltSpeed;
+            movingBelt.style.backgroundPosition = `${beltPos}px 0`;
 
-        for (let i = activeItems.length - 1; i >= 0; i--) {
-            let item = activeItems[i];
-            if (!item.isDragging) {
-                item.x -= beltSpeed; 
-                item.el.style.left = item.x + 'px';
-                item.el.style.top = '50%'; 
+            for (let i = activeItems.length - 1; i >= 0; i--) {
+                let item = activeItems[i];
+                if (!item.isDragging) {
+                    item.x -= beltSpeed; 
+                    item.el.style.left = item.x + 'px';
+                    item.el.style.top = '50%'; 
 
-                if (item.x < -150) { 
-                    let isNeeded = false;
-                    let filename = item.el.dataset.filename;
-                    Object.values(activeBoxesData).forEach(box => {
-                        if (box.req[filename] && box.req[filename].count < box.req[filename].required) {
-                            isNeeded = true;
+                    if (item.x < -150) { 
+                        let isNeeded = false;
+                        let filename = item.el.dataset.filename;
+                        Object.values(activeBoxesData).forEach(box => {
+                            if (box.req[filename] && box.req[filename].count < box.req[filename].required) {
+                                isNeeded = true;
+                            }
+                        });
+
+                        if (isNeeded) {
+                            gameOver("You let a needed item fall off the belt!");
+                            return; 
                         }
-                    });
 
-                    if (isNeeded) {
-                        gameOver("You let a needed item fall off the belt!");
-                        return; 
+                        item.el.remove();
+                        activeItems.splice(i, 1);
                     }
-
-                    item.el.remove();
-                    activeItems.splice(i, 1);
                 }
             }
-        }
 
-        if (distanceSinceLastSpawn >= 250) {
-            spawnItem();
-            distanceSinceLastSpawn = 0;
+            if (distanceSinceLastSpawn >= 250) {
+                spawnItem();
+                distanceSinceLastSpawn = 0;
+            }
         }
 
         if (gameActive) {
@@ -293,7 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let offsetX = 0, offsetY = 0;
         
         const startDrag = (e) => {
-            if (!gameActive) return;
+            if (!gameActive || isPaused) return;
             itemObj.isDragging = true;
             el.style.zIndex = 100;
             let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
@@ -304,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         const moveDrag = (e) => {
-            if (!itemObj.isDragging || !gameActive) return;
+            if (!itemObj.isDragging || !gameActive || isPaused) return;
             e.preventDefault(); 
             let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
             let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
@@ -314,7 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         const endDrag = (e) => {
-            if (!itemObj.isDragging || !gameActive) return;
+            if (!itemObj.isDragging || !gameActive || isPaused) return;
             itemObj.isDragging = false;
             el.style.zIndex = 5;
 
@@ -346,22 +403,16 @@ document.addEventListener("DOMContentLoaded", () => {
         let category = el.dataset.category;
         let filename = el.dataset.filename;
 
-        el.style.visibility = 'hidden';
-        let targetElement = document.elementFromPoint(dropX, dropY);
-        el.style.visibility = 'visible';
+        // 1. Boxes First (Priority)
+        let boxes = document.querySelectorAll('.drop-box');
+        let droppedInBox = null;
 
-        if (!targetElement) {
-            gameOver("You dropped an item on the floor!");
-            return;
-        }
-
-        if (targetElement.id === 'moving-belt') {
-            let trackRect = document.getElementById('item-track').getBoundingClientRect();
-            itemObj.x = dropX - trackRect.left; 
-            return;
-        }
-
-        let droppedInBox = targetElement.closest('.drop-box');
+        boxes.forEach(box => {
+            let rect = box.getBoundingClientRect();
+            if (dropX >= rect.left && dropX <= rect.right && dropY >= rect.top && dropY <= rect.bottom) {
+                droppedInBox = box;
+            }
+        });
 
         if (droppedInBox) {
             if (category === 'navigation') {
@@ -400,9 +451,21 @@ document.addEventListener("DOMContentLoaded", () => {
             activeItems = activeItems.filter(i => i !== itemObj);
             
             checkBoxComplete(targetBoxId);
-        } else {
-            gameOver("You dropped an item on the floor!");
+            return;
+        } 
+        
+        // 2. Visible Belt Second
+        let visibleBelt = document.getElementById('moving-belt');
+        let beltRect = visibleBelt.getBoundingClientRect();
+        
+        if (dropX >= beltRect.left && dropX <= beltRect.right && dropY >= beltRect.top && dropY <= beltRect.bottom) {
+            let trackRect = document.getElementById('item-track').getBoundingClientRect();
+            itemObj.x = dropX - trackRect.left; 
+            return;
         }
+
+        // 3. Floor Default
+        gameOver("You dropped an item on the floor!");
     }
 
     function checkBoxComplete(boxId) {
