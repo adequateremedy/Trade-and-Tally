@@ -27,10 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentRound = 1;
     let score = 0;
     let gameActive = false;
-    let spawnTimer;
-    let beltSpeed = 2; 
-    let spawnRate = 2500;
+    let beltSpeed = 1.0; 
     let beltPos = 0;
+    let distanceSinceLastSpawn = 120; // Tracks pixels moved to determine spawn spacing
     
     let activeItems = [];
     let activeBoxesData = {};
@@ -87,6 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
         activeItems = [];
         activeBoxesData = {};
         boxIdCounter = 0;
+        distanceSinceLastSpawn = 120; // Resets spacing for a clean start
         
         totalBoxesThisRound = boxesPerRound[currentRound - 1];
         boxesShippedThisRound = 0;
@@ -111,18 +111,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startGameplay() {
         gameActive = true;
-        spawnTimer = setInterval(spawnItem, spawnRate);
+        distanceSinceLastSpawn = 120; // Force immediate spawn on first frame
         requestAnimationFrame(updateGame);
     }
 
     function setupRoundConfig() {
-        const speeds = [0.2, 0.5, 0.7, 1.0, 1.2, 1.5, 1.7, 2.0, 2.5, 3.0];
-        beltSpeed = speeds[currentRound - 1] || 3.0;
-
-        if (currentRound <= 2) { spawnRate = 2500; }
-        else if (currentRound <= 5) { spawnRate = 2000; }
-        else if (currentRound <= 8) { spawnRate = 1500; }
-        else { spawnRate = 1200; }
+        const speeds = [1.0, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 3.2, 3.5];
+        beltSpeed = speeds[currentRound - 1] || 3.5;
 
         if (currentRound === 1) { activeCategories = ['mechanical_parts']; junkChance = 0; }
         else if (currentRound <= 3) { activeCategories = ['mechanical_parts', 'tools']; junkChance = currentRound === 3 ? 0.2 : 0; }
@@ -143,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let category = activeCategories[Math.floor(Math.random() * activeCategories.length)];
         
         let boxData = { category: category, req: {}, elementId: boxId };
-        let numTypes = 2;
+        let numTypes = 2; // Fixed at exactly 2 items per box as requested
         
         let availableItems = [...itemsData[category]];
         for(let i=0; i<numTypes; i++) {
@@ -209,7 +204,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
 
-            if (neededPool.length > 0 && Math.random() < 0.7) {
+            // Reduced chance of getting a needed item from 70% to 35%
+            if (neededPool.length > 0 && Math.random() < 0.35) {
                 let chosen = neededPool[Math.floor(Math.random() * neededPool.length)];
                 category = chosen.cat;
                 itemFile = chosen.file;
@@ -240,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!gameActive) return;
 
         beltPos -= beltSpeed;
+        distanceSinceLastSpawn += beltSpeed;
         movingBelt.style.backgroundPosition = `${beltPos}px 0`;
 
         for (let i = activeItems.length - 1; i >= 0; i--) {
@@ -250,13 +247,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 item.el.style.top = '50%'; 
 
                 if (item.x < -150) { 
+                    // Verify if the item falling off was actually needed
+                    let isNeeded = false;
+                    let filename = item.el.dataset.filename;
+                    Object.values(activeBoxesData).forEach(box => {
+                        if (box.req[filename] && box.req[filename].count < box.req[filename].required) {
+                            isNeeded = true;
+                        }
+                    });
+
+                    // Trigger penalty if the player missed a required item
+                    if (isNeeded) {
+                        gameOver("You let a needed item fall off the belt!");
+                        return; // Stop processing frame loop immediately
+                    }
+
                     item.el.remove();
                     activeItems.splice(i, 1);
                 }
             }
         }
 
-        requestAnimationFrame(updateGame);
+        // Distance-based spawning (spawns purely based on pixels moved to prevent bunching)
+        if (distanceSinceLastSpawn >= 120) {
+            spawnItem();
+            distanceSinceLastSpawn = 0;
+        }
+
+        // Only request next frame if the game didn't just end
+        if (gameActive) {
+            requestAnimationFrame(updateGame);
+        }
     }
 
     function setupDrag(itemObj) {
@@ -399,7 +420,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function endRoundSuccess() {
         gameActive = false;
-        clearInterval(spawnTimer);
         
         setTimeout(() => {
             if (currentRound < 10) {
@@ -415,7 +435,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function gameOver(reason) {
         gameActive = false;
-        clearInterval(spawnTimer);
         failReasonText.innerText = reason;
         gameScreen.classList.remove("active");
         gameOverScreen.classList.add("active");
