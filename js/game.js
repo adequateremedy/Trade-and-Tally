@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const movingBelt = document.getElementById("moving-belt");
     const itemTrack = document.getElementById("item-track");
     const boxesContainer = document.getElementById("boxes-container");
+    
+    const bgMusic = document.getElementById("bg-music");
 
     // Game State
     let currentRound = 1;
@@ -39,6 +41,16 @@ document.addEventListener("DOMContentLoaded", () => {
     let boxesShippedThisRound = 0;
     let boxesSpawnedThisRound = 0;
     let activeBoxesCount = 0;
+
+    // Audio Playlist State
+    const playlist = ['assets/audio/Packing-Boxes.mp3', 'assets/audio/Daily-Grind.mp3'];
+    let currentTrackIndex = 0;
+
+    bgMusic.addEventListener('ended', () => {
+        currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+        bgMusic.src = playlist[currentTrackIndex];
+        bgMusic.play().catch(e => console.log(e));
+    });
 
     // Categories and Exactly Matched Items
     const itemsData = {
@@ -62,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     startBtn.addEventListener("click", () => {
         introScreen.classList.remove("active");
+        bgMusic.play().catch(e => console.log("Audio play prevented:", e));
         setupRound(1);
     });
 
@@ -73,6 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     restartBtn.addEventListener("click", () => {
         gameOverScreen.classList.remove("active");
         score = 0;
+        bgMusic.play().catch(e => console.log("Audio play prevented:", e));
         setupRound(1);
     });
 
@@ -427,6 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 gameScreen.classList.remove("active");
                 roundResultsScreen.classList.add("active");
             } else {
+                bgMusic.pause();
                 gameScreen.classList.remove("active");
                 victoryScreen.classList.add("active");
             }
@@ -435,6 +450,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function gameOver(reason) {
         gameActive = false;
+        bgMusic.pause();
         failReasonText.innerText = reason;
         gameScreen.classList.remove("active");
         gameOverScreen.classList.add("active");
