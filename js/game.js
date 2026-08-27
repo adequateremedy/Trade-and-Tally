@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let gameActive = false;
     let beltSpeed = 1.0; 
     let beltPos = 0;
-    let distanceSinceLastSpawn = 250; // Tracks pixels moved to determine spawn spacing
+    let distanceSinceLastSpawn = 250; 
     
     let activeItems = [];
     let activeBoxesData = {};
@@ -58,16 +58,14 @@ document.addEventListener("DOMContentLoaded", () => {
         tools: ['Calipers-removebg-preview.png', 'Chisel-removebg-preview.png', 'Drill-removebg-preview.png', 'File-removebg-preview.png', 'Hackksaw-removebg-preview.png', 'Hammer-removebg-preview.png', 'Mallet-removebg-preview.png', 'Pliers-removebg-preview.png', 'Screwdriver-removebg-preview.png', 'Wrench-removebg-preview.png'],
         gears_cogs: ['Cam.png', 'Cog.png', 'Crank.png', 'FlyWheel.png', 'Gear.png', 'Main-Spring.png', 'Pinion.png', 'Rachet.png', 'Spindel.png', 'Sprocket.png'],
         raw_materials: ['Coal-Chunk.png', 'Glass-Shard.png', 'Leather-Scrap.png', 'Ore.png', 'Pipe.png', 'Plate.png', 'Rubber-Tubing.png', 'Sheet-Metal.png', 'Wire-Spool.png', 'Wood-Block.png'],
-        navigation: ['Compass.png', 'Lantern.png', 'Magnifying-Lens.png', 'Matchbox.png', 'Monocle.png', 'Oil-Flask.png', 'Pocket-Watch.png', 'Sextant.png', 'Spyglass.png', 'Sundial.png'] // JUNK
+        navigation: ['Compass.png', 'Lantern.png', 'Magnifying-Lens.png', 'Matchbox.png', 'Monocle.png', 'Oil-Flask.png', 'Pocket-Watch.png', 'Sextant.png', 'Spyglass.png', 'Sundial.png'] 
     };
 
-    // Exactly 100 boxes across 10 rounds = 2000 points
     const boxesPerRound = [5, 6, 7, 8, 9, 10, 11, 12, 15, 17];
     
     let activeCategories = [];
     let junkChance = 0;
 
-    // Clean display name helper
     function getDisplayName(filename) {
         return filename.replace('-removebg-preview.png', '').replace('.png', '');
     }
@@ -101,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
         activeItems = [];
         activeBoxesData = {};
         boxIdCounter = 0;
-        distanceSinceLastSpawn = 250; // Resets spacing for a clean start
+        distanceSinceLastSpawn = 250; 
         
         totalBoxesThisRound = boxesPerRound[currentRound - 1];
         boxesShippedThisRound = 0;
@@ -126,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startGameplay() {
         gameActive = true;
-        distanceSinceLastSpawn = 250; // Force immediate spawn on first frame
+        distanceSinceLastSpawn = 250; 
         requestAnimationFrame(updateGame);
     }
 
@@ -153,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let category = activeCategories[Math.floor(Math.random() * activeCategories.length)];
         
         let boxData = { category: category, req: {}, elementId: boxId };
-        let numTypes = 2; // Fixed at exactly 2 items per box as requested
+        let numTypes = 2; 
         
         let availableItems = [...itemsData[category]];
         for(let i=0; i<numTypes; i++) {
@@ -219,7 +217,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
 
-            // Reduced chance of getting a needed item from 70% to 35%
             if (neededPool.length > 0 && Math.random() < 0.35) {
                 let chosen = neededPool[Math.floor(Math.random() * neededPool.length)];
                 category = chosen.cat;
@@ -262,7 +259,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 item.el.style.top = '50%'; 
 
                 if (item.x < -150) { 
-                    // Verify if the item falling off was actually needed
                     let isNeeded = false;
                     let filename = item.el.dataset.filename;
                     Object.values(activeBoxesData).forEach(box => {
@@ -271,10 +267,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     });
 
-                    // Trigger penalty if the player missed a required item
                     if (isNeeded) {
                         gameOver("You let a needed item fall off the belt!");
-                        return; // Stop processing frame loop immediately
+                        return; 
                     }
 
                     item.el.remove();
@@ -283,13 +278,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Distance-based spawning (spawns purely based on pixels moved to prevent bunching)
         if (distanceSinceLastSpawn >= 250) {
             spawnItem();
             distanceSinceLastSpawn = 0;
         }
 
-        // Only request next frame if the game didn't just end
         if (gameActive) {
             requestAnimationFrame(updateGame);
         }
@@ -325,13 +318,19 @@ document.addEventListener("DOMContentLoaded", () => {
             itemObj.isDragging = false;
             el.style.zIndex = 5;
 
-            let rect = el.getBoundingClientRect();
-            let dropX = rect.left + rect.width / 2;
-            let dropY = rect.top + rect.height / 2;
+            // Get exact mouse/touch release coordinates
+            let clientX, clientY;
+            if (e.type.includes('mouse')) {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            } else {
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            }
             
             el.style.position = 'absolute';
 
-            checkDropZone(itemObj, dropX, dropY);
+            checkDropZone(itemObj, clientX, clientY);
         };
 
         el.addEventListener('mousedown', startDrag);
@@ -348,9 +347,12 @@ document.addEventListener("DOMContentLoaded", () => {
         let category = el.dataset.category;
         let filename = el.dataset.filename;
 
-        let beltRect = document.getElementById('conveyor-container').getBoundingClientRect();
+        // Check strictly for the moving belt portion, ignoring the static frames
+        let beltRect = document.getElementById('moving-belt').getBoundingClientRect();
+        let trackRect = document.getElementById('item-track').getBoundingClientRect();
+        
         if (dropX >= beltRect.left && dropX <= beltRect.right && dropY >= beltRect.top && dropY <= beltRect.bottom) {
-            itemObj.x = dropX - beltRect.left; 
+            itemObj.x = dropX - trackRect.left; 
             return;
         }
 
