@@ -318,7 +318,6 @@ document.addEventListener("DOMContentLoaded", () => {
             itemObj.isDragging = false;
             el.style.zIndex = 5;
 
-            // Get exact mouse/touch release coordinates
             let clientX, clientY;
             if (e.type.includes('mouse')) {
                 clientX = e.clientX;
@@ -347,24 +346,22 @@ document.addEventListener("DOMContentLoaded", () => {
         let category = el.dataset.category;
         let filename = el.dataset.filename;
 
-        // Check strictly for the moving belt portion, ignoring the static frames
-        let beltRect = document.getElementById('moving-belt').getBoundingClientRect();
-        let trackRect = document.getElementById('item-track').getBoundingClientRect();
-        
-        if (dropX >= beltRect.left && dropX <= beltRect.right && dropY >= beltRect.top && dropY <= beltRect.bottom) {
+        el.style.visibility = 'hidden';
+        let targetElement = document.elementFromPoint(dropX, dropY);
+        el.style.visibility = 'visible';
+
+        if (!targetElement) {
+            gameOver("You dropped an item on the floor!");
+            return;
+        }
+
+        if (targetElement.id === 'moving-belt') {
+            let trackRect = document.getElementById('item-track').getBoundingClientRect();
             itemObj.x = dropX - trackRect.left; 
             return;
         }
 
-        let boxes = document.querySelectorAll('.drop-box');
-        let droppedInBox = null;
-
-        boxes.forEach(box => {
-            let rect = box.getBoundingClientRect();
-            if (dropX >= rect.left && dropX <= rect.right && dropY >= rect.top && dropY <= rect.bottom) {
-                droppedInBox = box;
-            }
-        });
+        let droppedInBox = targetElement.closest('.drop-box');
 
         if (droppedInBox) {
             if (category === 'navigation') {
