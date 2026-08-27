@@ -74,19 +74,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     startBtn.addEventListener("click", () => {
         introScreen.classList.remove("active");
-        bgMusic.play().catch(e => console.log("Audio play prevented:", e));
         setupRound(1);
     });
 
     beginBtn.addEventListener("click", () => {
         beginOverlay.style.display = 'none';
+        bgMusic.play().catch(e => console.log(e));
         startGameplay();
     });
 
     restartBtn.addEventListener("click", () => {
         gameOverScreen.classList.remove("active");
         score = 0;
-        bgMusic.play().catch(e => console.log("Audio play prevented:", e));
+        currentTrackIndex = 0;
+        bgMusic.src = playlist[0];
         setupRound(1);
     });
 
@@ -434,6 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function endRoundSuccess() {
         gameActive = false;
+        bgMusic.pause();
         
         setTimeout(() => {
             if (currentRound < 10) {
@@ -441,7 +443,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 gameScreen.classList.remove("active");
                 roundResultsScreen.classList.add("active");
             } else {
-                bgMusic.pause();
                 gameScreen.classList.remove("active");
                 victoryScreen.classList.add("active");
             }
