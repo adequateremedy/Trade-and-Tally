@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let spawnTimer;
     let beltSpeed = 2; 
     let spawnRate = 2500;
+    let beltPos = 0;
     
     let activeItems = [];
     let activeBoxesData = {};
@@ -105,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setupRoundConfig();
         maintainBoxes();
         
-        movingBelt.style.animationDuration = `${10 / beltSpeed}s`;
+        movingBelt.style.animation = 'none';
     }
 
     function startGameplay() {
@@ -115,10 +116,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setupRoundConfig() {
-        if (currentRound <= 2) { beltSpeed = 1.5; spawnRate = 2500; }
-        else if (currentRound <= 5) { beltSpeed = 2; spawnRate = 2000; }
-        else if (currentRound <= 8) { beltSpeed = 3; spawnRate = 1500; }
-        else { beltSpeed = 4; spawnRate = 1200; }
+        const speeds = [0.2, 0.5, 0.7, 1.0, 1.2, 1.5, 1.7, 2.0, 2.5, 3.0];
+        beltSpeed = speeds[currentRound - 1] || 3.0;
+
+        if (currentRound <= 2) { spawnRate = 2500; }
+        else if (currentRound <= 5) { spawnRate = 2000; }
+        else if (currentRound <= 8) { spawnRate = 1500; }
+        else { spawnRate = 1200; }
 
         if (currentRound === 1) { activeCategories = ['mechanical_parts']; junkChance = 0; }
         else if (currentRound <= 3) { activeCategories = ['mechanical_parts', 'tools']; junkChance = currentRound === 3 ? 0.2 : 0; }
@@ -139,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let category = activeCategories[Math.floor(Math.random() * activeCategories.length)];
         
         let boxData = { category: category, req: {}, elementId: boxId };
-        let numTypes = currentRound < 4 ? 2 : 3;
+        let numTypes = 2;
         
         let availableItems = [...itemsData[category]];
         for(let i=0; i<numTypes; i++) {
@@ -234,6 +238,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateGame() {
         if (!gameActive) return;
+
+        beltPos -= beltSpeed;
+        movingBelt.style.backgroundPosition = `${beltPos}px 0`;
 
         for (let i = activeItems.length - 1; i >= 0; i--) {
             let item = activeItems[i];
