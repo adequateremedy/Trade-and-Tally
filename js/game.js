@@ -1,4 +1,84 @@
 /* js/game.js */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
+
+// FIREBASE SETUP
+const firebaseConfig = {
+    apiKey: "AIzaSyAeyOzh9YHaQDMSvn-8-ZyVqXkwY_diL5Y",
+    authDomain: "solus-dynasty-rpg.firebaseapp.com",
+    projectId: "solus-dynasty-rpg"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+    console.error("Persistence error:", error);
+});
+
+// DATA LOGIC
+let gDriveToken = localStorage.getItem("gDriveToken") || null;
+let dataFileId = null;
+let playerJsonData = {};
+let charData = {}; 
+
+async function syncDriveData(scoreDisplay, roundDisplay) {
+    const res = await fetch("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='character_data.json'", {
+        headers: { 'Authorization': `Bearer ${gDriveToken}` }
+    });
+    const data = await res.json();
+    if (data.files && data.files.length > 0) {
+        dataFileId = data.files[0].id;
+        const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${dataFileId}?alt=media`, {
+            headers: { 'Authorization': `Bearer ${gDriveToken}` }
+        });
+        playerJsonData = await fileRes.json();
+    }
+
+    if (playerJsonData.stars && playerJsonData.stars["1"] && playerJsonData.stars["1"].gens && playerJsonData.stars["1"].gens["1"]) {
+        charData = playerJsonData.stars["1"].gens["1"];
+    } else {
+        charData = playerJsonData;
+    }
+
+    if (charData.class2Points === undefined) charData.class2Points = 0;
+    if (charData.class2Round === undefined) charData.class2Round = 1;
+    if (charData.schoolProgress === undefined) {
+        charData.schoolProgress = { class1: false, class2: false, class3: false, class4: false, class5: false };
+    }
+    
+    // Update the UI immediately after pulling the save
+    scoreDisplay.innerText = `Score: ${charData.class2Points} / 2000`;
+    roundDisplay.innerText = `Round: ${charData.class2Round} / 10`;
+}
+
+// TOKEN REFRESH SAFETY NET HELPER
+async function safeAction(actionFunc, redirectUrl = null) {
+    try {
+        await actionFunc();
+        if (redirectUrl) window.location.href = redirectUrl;
+    } catch (err) {
+        if (err.message === "Token Expired" || err.status === 401) {
+            alert("Your session expired! Click OK to securely reconnect and save your progress.");
+            try {
+                const provider = new GoogleAuthProvider();
+                provider.addScope('https://www.googleapis.com/auth/drive.appdata');
+                const result = await signInWithPopup(auth, provider);
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                gDriveToken = credential.accessToken;
+                localStorage.setItem("gDriveToken", gDriveToken);
+                
+                await actionFunc(); // Retry the save with the fresh token
+                if (redirectUrl) window.location.href = redirectUrl;
+            } catch (authErr) {
+                console.error("Re-authentication failed:", authErr);
+                alert("Failed to reconnect. Please click the button to try again.");
+            }
+        } else {
+            console.error("Action failed:", err);
+        }
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     // UI Elements
     const introScreen = document.getElementById("intro-screen");
@@ -47,6 +127,32 @@ document.addEventListener("DOMContentLoaded", () => {
     let boxesShippedThisRound = 0;
     let boxesSpawnedThisRound = 0;
     let activeBoxesCount = 0;
+
+    // Load Drive Data on Auth State
+    onAuthStateChanged(auth, async (user) => {
+        if (user && gDriveToken) {
+            await syncDriveData(scoreDisplay, roundDisplay);
+            score = charData.class2Points;
+            currentRound = charData.class2Round;
+        } else {
+            window.location.href = "https://adequateremedy.github.io/RPG-Hub/";
+        }
+    });
+
+    async function saveDriveData() {
+        if (!dataFileId) return;
+        
+        charData.class2Points = score;
+        charData.class2Round = currentRound;
+        
+        const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${dataFileId}?uploadType=media`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${gDriveToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(playerJsonData)
+        });
+        
+        if (res.status === 401) throw new Error("Token Expired");
+    }
 
     // Audio Playlist State
     const playlist = ['assets/audio/Packing-Boxes.mp3', 'assets/audio/Daily-Grind.mp3'];
@@ -103,10 +209,10 @@ document.addEventListener("DOMContentLoaded", () => {
     
     generateGlossary();
 
-    // Button Listeners
+    // Button Listeners (WITH SAFETY NET)
     startBtn.addEventListener("click", () => {
         introScreen.classList.remove("active");
-        setupRound(1);
+        setupRound(currentRound);
     });
 
     beginBtn.addEventListener("click", () => {
@@ -119,18 +225,35 @@ document.addEventListener("DOMContentLoaded", () => {
     restartBtn.addEventListener("click", () => {
         gameOverScreen.classList.remove("active");
         score = 0;
+        currentRound = 1;
         currentTrackIndex = 0;
         bgMusic.src = playlist[0];
-        setupRound(1);
+        safeAction(saveDriveData).then(() => {
+            setupRound(1);
+        });
     });
 
     nextRoundBtn.addEventListener("click", () => {
         roundResultsScreen.classList.remove("active");
-        setupRound(currentRound + 1);
+        currentRound++;
+        safeAction(saveDriveData).then(() => {
+            setupRound(currentRound);
+        });
     });
 
     returnHubBtn.addEventListener("click", () => {
-        window.location.href = "https://adequateremedy.github.io/RPG-Hub/?class2Complete=true";
+        let isComplete = charData.schoolProgress && charData.schoolProgress.class2;
+        
+        if (score >= 2000 && !isComplete) {
+            charData.schoolProgress.class2 = true;
+            isComplete = true;
+        }
+
+        const url = isComplete 
+            ? "https://adequateremedy.github.io/RPG-Hub/?class2Complete=true" 
+            : "https://adequateremedy.github.io/RPG-Hub/";
+
+        safeAction(saveDriveData, url);
     });
 
     // Pause functionality
