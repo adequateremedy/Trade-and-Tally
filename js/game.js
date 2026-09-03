@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const nextRoundBtn = document.getElementById("next-round-btn");
     const pauseBtn = document.getElementById("pause-btn");
     const resumeBtn = document.getElementById("resume-btn");
+    const returnHubBtn = document.getElementById("return-hub-btn");
     
     const roundDisplay = document.getElementById("round-display");
     const truckDisplay = document.getElementById("truck-display");
@@ -126,6 +127,10 @@ document.addEventListener("DOMContentLoaded", () => {
     nextRoundBtn.addEventListener("click", () => {
         roundResultsScreen.classList.remove("active");
         setupRound(currentRound + 1);
+    });
+
+    returnHubBtn.addEventListener("click", () => {
+        window.location.href = "https://adequateremedy.github.io/RPG-Hub/";
     });
 
     // Pause functionality
