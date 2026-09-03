@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     returnHubBtn.addEventListener("click", () => {
-        window.location.href = "https://adequateremedy.github.io/RPG-Hub/";
+        window.location.href = "https://adequateremedy.github.io/RPG-Hub/?class2Complete=true";
     });
 
     // Pause functionality
@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resumeBtn.addEventListener("click", togglePause);
 
     function togglePause() {
-        if (!gameActive) return; // Only allow pause if game is actively running
+        if (!gameActive) return; 
         
         isPaused = !isPaused;
         
@@ -212,11 +212,9 @@ document.addEventListener("DOMContentLoaded", () => {
         let boxData = { category: category, req: {}, elementId: boxId };
         let numTypes = 2; 
         
-        // Find items currently on the belt to avoid requesting them
         let itemsOnBelt = activeItems.map(itemObj => itemObj.el.dataset.filename);
         let availableItems = itemsData[category].filter(filename => !itemsOnBelt.includes(filename));
         
-        // Fallback in case the belt somehow has too many items from this category
         if (availableItems.length < numTypes) {
             availableItems = [...itemsData[category]];
         }
@@ -314,7 +312,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateGame() {
         if (!gameActive) return;
 
-        // Skip calculations if paused, but maintain the animation frame loop
         if (!isPaused) {
             beltPos -= beltSpeed;
             distanceSinceLastSpawn += beltSpeed;
@@ -416,7 +413,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let category = el.dataset.category;
         let filename = el.dataset.filename;
 
-        // 1. Boxes First (Priority)
         let boxes = document.querySelectorAll('.drop-box');
         let droppedInBox = null;
 
@@ -467,7 +463,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         } 
         
-        // 2. Visible Belt Second
         let visibleBelt = document.getElementById('moving-belt');
         let beltRect = visibleBelt.getBoundingClientRect();
         
@@ -477,7 +472,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // 3. Floor Default
         gameOver("You dropped an item on the floor!");
     }
 
