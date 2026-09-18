@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let isPaused = false;
     let beltSpeed = 1.0; 
     let beltPos = 0;
-    let distanceSinceLastSpawn = 250; 
+    let distanceSinceLastSpawn = 400; 
     
     let activeItems = [];
     let activeBoxesData = {};
@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
         navigation: ['Compass.png', 'Lantern.png', 'Magnifying-Lens.png', 'Matchbox.png', 'Monocle.png', 'Oil-Flask.png', 'Pocket-Watch.png', 'Sextant.png', 'Spyglass.png', 'Sundial.png'] 
     };
 
-    const boxesPerRound = [5, 6, 7, 8, 9, 10, 11, 12, 15, 17];
+    const boxesPerRound = [5, 5, 6, 6, 7, 7, 8, 9, 9, 10];
     
     let activeCategories = [];
     let junkChance = 0;
@@ -279,7 +279,7 @@ document.addEventListener("DOMContentLoaded", () => {
         activeItems = [];
         activeBoxesData = {};
         boxIdCounter = 0;
-        distanceSinceLastSpawn = 250; 
+        distanceSinceLastSpawn = 400; 
         isPaused = false;
         
         totalBoxesThisRound = boxesPerRound[currentRound - 1];
@@ -306,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startGameplay() {
         gameActive = true;
-        distanceSinceLastSpawn = 250; 
+        distanceSinceLastSpawn = 400; 
         requestAnimationFrame(updateGame);
     }
 
@@ -467,7 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            if (distanceSinceLastSpawn >= 250) {
+            if (distanceSinceLastSpawn >= 400) {
                 spawnItem();
                 distanceSinceLastSpawn = 0;
             }
