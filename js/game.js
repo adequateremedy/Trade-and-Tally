@@ -117,8 +117,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let isPaused = false;
     let beltSpeed = 1.0; 
     let beltPos = 0;
-    let currentSpawnDistance = 250;
-    let distanceSinceLastSpawn = 250; 
+    let currentSpawnDistance = 125;
+    let distanceSinceLastSpawn = 125; 
     
     let activeItems = [];
     let activeBoxesData = {};
@@ -315,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const speeds = [1.0, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 3.2, 3.5];
         beltSpeed = speeds[currentRound - 1] || 3.5;
 
-        const spawnDistances = [250, 250, 250, 275, 300, 325, 350, 375, 400, 400];
+        const spawnDistances = [125, 150, 175, 200, 225, 275, 325, 350, 375, 400];
         currentSpawnDistance = spawnDistances[currentRound - 1] || 400;
 
         if (currentRound === 1) { activeCategories = ['mechanical_parts']; junkChance = 0; }
