@@ -48,7 +48,7 @@ async function syncDriveData(scoreDisplay, roundDisplay) {
     
     // Update the UI immediately after pulling the save
     scoreDisplay.innerText = `Score: ${charData.class2Points} / 2000`;
-    roundDisplay.innerText = `Round: ${charData.class2Round} / 10`;
+    roundDisplay.innerText = `Round: ${charData.class2Round} / 5`;
 }
 
 // TOKEN REFRESH SAFETY NET HELPER (SILENT REFRESH)
@@ -175,7 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
         navigation: ['Compass.png', 'Lantern.png', 'Magnifying-Lens.png', 'Matchbox.png', 'Monocle.png', 'Oil-Flask.png', 'Pocket-Watch.png', 'Sextant.png', 'Spyglass.png', 'Sundial.png'] 
     };
 
-    const boxesPerRound = [5, 5, 6, 6, 7, 7, 8, 9, 9, 10];
+    // Exactly 40 boxes total across 5 rounds
+    const boxesPerRound = [6, 7, 8, 9, 10];
     
     let activeCategories = [];
     let junkChance = 0;
@@ -244,7 +245,8 @@ document.addEventListener("DOMContentLoaded", () => {
     returnHubBtn.addEventListener("click", () => {
         let isComplete = charData.schoolProgress && charData.schoolProgress.class2;
         
-        if (score >= 2000 && !isComplete) {
+        // Mark as complete if they beat Round 5 OR hit the 2000 score threshold early
+        if ((currentRound >= 5 || score >= 2000) && !isComplete) {
             charData.schoolProgress.class2 = true;
             isComplete = true;
         }
@@ -281,7 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
         boxIdCounter = 0;
         isPaused = false;
         
-        totalBoxesThisRound = boxesPerRound[currentRound - 1];
+        totalBoxesThisRound = boxesPerRound[currentRound - 1] || 10;
         boxesShippedThisRound = 0;
         boxesSpawnedThisRound = 0;
         activeBoxesCount = 0;
@@ -291,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
         beginOverlay.style.display = 'flex'; 
         pauseScreen.classList.remove("active");
 
-        roundDisplay.innerText = `Round: ${currentRound} / 10`;
+        roundDisplay.innerText = `Round: ${currentRound} / 5`;
         truckDisplay.innerText = `On the Truck: 0 / ${totalBoxesThisRound}`;
         scoreDisplay.innerText = `Score: ${score} / 2000`;
 
@@ -311,15 +313,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setupRoundConfig() {
-        const speeds = [1.0, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 3.2, 3.5];
-        beltSpeed = speeds[currentRound - 1] || 3.5;
+        const speeds = [1.0, 1.2, 1.5, 1.8, 2.1];
+        beltSpeed = speeds[currentRound - 1] || 2.1;
 
-        const spawnDistances = [125, 150, 175, 200, 225, 275, 325, 350, 375, 400];
-        currentSpawnDistance = spawnDistances[currentRound - 1] || 400;
+        const spawnDistances = [125, 150, 175, 200, 225];
+        currentSpawnDistance = spawnDistances[currentRound - 1] || 225;
 
         if (currentRound === 1) { activeCategories = ['mechanical_parts']; junkChance = 0; }
-        else if (currentRound <= 3) { activeCategories = ['mechanical_parts', 'tools']; junkChance = currentRound === 3 ? 0.2 : 0; }
-        else if (currentRound <= 8) { activeCategories = ['mechanical_parts', 'tools', 'raw_materials']; junkChance = 0.3; }
+        else if (currentRound === 2) { activeCategories = ['mechanical_parts', 'tools']; junkChance = 0; }
+        else if (currentRound === 3) { activeCategories = ['mechanical_parts', 'tools']; junkChance = 0.2; }
+        else if (currentRound === 4) { activeCategories = ['mechanical_parts', 'tools', 'raw_materials']; junkChance = 0.3; }
         else { activeCategories = ['mechanical_parts', 'tools', 'raw_materials', 'gears_cogs']; junkChance = 0.4; }
     }
 
@@ -610,7 +613,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (allComplete) {
-            score += 20;
+            // Updated score to yield exactly 2000 points over 40 boxes (50 per box)
+            score += 50;
             boxesShippedThisRound++;
             activeBoxesCount--;
             
@@ -633,7 +637,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bgMusic.pause();
         
         setTimeout(() => {
-            if (currentRound < 10) {
+            if (currentRound < 5) {
                 resultsStats.innerText = `Boxes Shipped: ${boxesShippedThisRound}\nCurrent Score: ${score} / 2000`;
                 gameScreen.classList.remove("active");
                 roundResultsScreen.classList.add("active");
