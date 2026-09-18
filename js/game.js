@@ -117,7 +117,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let isPaused = false;
     let beltSpeed = 1.0; 
     let beltPos = 0;
-    let distanceSinceLastSpawn = 400; 
+    let currentSpawnDistance = 250;
+    let distanceSinceLastSpawn = 250; 
     
     let activeItems = [];
     let activeBoxesData = {};
@@ -279,7 +280,6 @@ document.addEventListener("DOMContentLoaded", () => {
         activeItems = [];
         activeBoxesData = {};
         boxIdCounter = 0;
-        distanceSinceLastSpawn = 400; 
         isPaused = false;
         
         totalBoxesThisRound = boxesPerRound[currentRound - 1];
@@ -299,6 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
         gameScreen.classList.add("active");
 
         setupRoundConfig();
+        distanceSinceLastSpawn = currentSpawnDistance; 
         maintainBoxes();
         
         movingBelt.style.animation = 'none';
@@ -306,13 +307,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startGameplay() {
         gameActive = true;
-        distanceSinceLastSpawn = 400; 
+        distanceSinceLastSpawn = currentSpawnDistance; 
         requestAnimationFrame(updateGame);
     }
 
     function setupRoundConfig() {
         const speeds = [1.0, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 3.2, 3.5];
         beltSpeed = speeds[currentRound - 1] || 3.5;
+
+        const spawnDistances = [250, 250, 250, 275, 300, 325, 350, 375, 400, 400];
+        currentSpawnDistance = spawnDistances[currentRound - 1] || 400;
 
         if (currentRound === 1) { activeCategories = ['mechanical_parts']; junkChance = 0; }
         else if (currentRound <= 3) { activeCategories = ['mechanical_parts', 'tools']; junkChance = currentRound === 3 ? 0.2 : 0; }
@@ -467,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            if (distanceSinceLastSpawn >= 400) {
+            if (distanceSinceLastSpawn >= currentSpawnDistance) {
                 spawnItem();
                 distanceSinceLastSpawn = 0;
             }
