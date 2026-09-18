@@ -51,17 +51,17 @@ async function syncDriveData(scoreDisplay, roundDisplay) {
     roundDisplay.innerText = `Round: ${charData.class2Round} / 10`;
 }
 
-// TOKEN REFRESH SAFETY NET HELPER
+// TOKEN REFRESH SAFETY NET HELPER (SILENT REFRESH)
 async function safeAction(actionFunc, redirectUrl = null) {
     try {
         await actionFunc();
         if (redirectUrl) window.location.href = redirectUrl;
     } catch (err) {
         if (err.message === "Token Expired" || err.status === 401) {
-            alert("Your session expired! Click OK to securely reconnect and save your progress.");
             try {
                 const provider = new GoogleAuthProvider();
                 provider.addScope('https://www.googleapis.com/auth/drive.appdata');
+                provider.setCustomParameters({ prompt: 'none' });
                 const result = await signInWithPopup(auth, provider);
                 const credential = GoogleAuthProvider.credentialFromResult(result);
                 gDriveToken = credential.accessToken;
@@ -71,7 +71,6 @@ async function safeAction(actionFunc, redirectUrl = null) {
                 if (redirectUrl) window.location.href = redirectUrl;
             } catch (authErr) {
                 console.error("Re-authentication failed:", authErr);
-                alert("Failed to reconnect. Please click the button to try again.");
             }
         } else {
             console.error("Action failed:", err);
